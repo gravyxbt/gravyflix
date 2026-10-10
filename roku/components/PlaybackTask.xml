@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="PlaybackTask" extends="Task">
+  <interface>
+    <field id="baseUrl" type="string" />
+    <field id="intent" type="string" value="resume" />
+    <field id="mode" type="string" value="auto" />
+    <field id="movieId" type="integer" />
+    <field id="cancelled" type="boolean" value="false" />
+    <field id="statusText" type="string" alwaysNotify="true" />
+    <field id="result" type="assocarray" alwaysNotify="true" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/PlaybackHttp.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ClientIdentity.brs" />
+  <script type="text/brightscript" uri="PlaybackTask.brs" />
+</component>

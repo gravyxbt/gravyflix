@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MovieContent" extends="ContentNode">
+  <interface>
+    <field id="homeRowKey" type="string" />
+    <field id="movieData" type="assocarray" />
+    <field id="metadataLine" type="string" />
+    <field id="cardImage" type="string" />
+    <field id="portraitArt" type="boolean" />
+    <field id="heroImage" type="string" />
+    <field id="progress" type="float" />
+  </interface>
+</component>

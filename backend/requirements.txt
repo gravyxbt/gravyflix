@@ -1,0 +1,11 @@
+fastapi==0.135.1
+uvicorn==0.42.0
+python-dotenv==1.2.2
+PyChromecast==14.0.10
+Pillow==12.3.0
+beautifulsoup4==4.15.0
+ffsubsync==0.5.1
+
+# Bundled local OCR models; CPU inference for automatic movie credits.
+rapidocr==3.9.2
+onnxruntime==1.30.0

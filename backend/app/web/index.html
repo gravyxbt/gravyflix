@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#090b12" />
+    <title>GRAVYFLIX</title>
+    <link rel="stylesheet" href="/web/style.css?v=3" />
+    <script type="module" src="/web/app.js?v=4"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="GRAVYFLIX home"
+        ><img src="/web/assets/logo.png" alt="GRAVYFLIX"
+      /></a>
+      <nav aria-label="Browse">
+        <button class="nav selected" data-view="home" aria-current="page">
+          Home</button
+        ><button class="nav" data-view="movies">Movies</button
+        ><button class="nav" data-view="shows">Shows</button
+        ><button class="nav" data-view="search">Search</button>
+      </nav>
+      <a href="/manage" class="icon-button" aria-label="Manage server" style="text-decoration:none">⚙</a>
+      <button id="refresh" class="icon-button" aria-label="Refresh library">
+        ↻
+      </button>
+    </header>
+    <main>
+      <div class="connection">
+        <span id="dot" class="dot"></span
+        ><span id="connection">Connecting to your TV…</span
+        ><button id="remote-link" hidden>Remote control ↓</button>
+      </div>
+      <p id="notice" role="status" aria-live="polite"></p>
+      <section id="hero" aria-label="Featured title">
+        <img id="hero-art" src="/web/assets/hero.png" alt="" />
+        <div class="hero-shade"></div>
+        <div class="hero-copy">
+          <p class="eyebrow" id="hero-kind">YOUR HOME CINEMA</p>
+          <h1 id="hero-title">Your next great watch.</h1>
+          <p id="hero-meta" class="metadata"></p>
+          <p id="hero-description">
+            Your library on the big screen. Your phone is the remote.
+          </p>
+          <p id="hero-subtitles" class="subtitle-label"></p>
+          <div class="actions">
+            <button id="hero-play" class="primary" disabled>▶ Play on TV</button
+            ><button id="hero-info" disabled>More info</button>
+          </div>
+        </div>
+      </section>
+      <section id="search-panel" hidden>
+        <label for="search">Find something to watch</label
+        ><input
+          id="search"
+          type="search"
+          placeholder="Titles, shows, or genres…"
+          autocomplete="off"
+        />
+      </section>
+      <div id="shelves"></div>
+      <p id="empty" hidden>
+        No titles yet. Add media to your server and scan the library.
+      </p>
+      <section id="remote" hidden aria-label="TV playback controls">
+        <div class="remote-heading">
+          <div>
+            <p class="eyebrow">PLAYING ON <span id="tv-name">YOUR TV</span></p>
+            <h2 id="now-title"></h2>
+            <p id="state"></p>
+          </div>
+          <button id="stop">Stop</button>
+        </div>
+        <label for="seek" class="sr-only">Playback position</label
+        ><input id="seek" type="range" min="0" max="1" step="1" value="0" />
+        <div class="time">
+          <span id="elapsed">0:00</span><span id="duration">0:00</span>
+        </div>
+        <div class="controls">
+          <button id="rewind">−10s</button
+          ><button id="pause" class="primary">Pause</button
+          ><button id="resume" class="primary" hidden>Resume</button
+          ><button id="forward">+10s</button>
+        </div>
+        <div class="preferences">
+          <label for="captions">Subtitles</label
+          ><select id="captions">
+            <option value="">Off</option></select
+          ><label class="toggle"
+            ><input id="autoplay" type="checkbox" checked /> Autoplay next
+            title</label
+          >
+        </div>
+        <div id="up-next" hidden>
+          <p class="eyebrow">UP NEXT · <span id="countdown"></span></p>
+          <h3 id="next-title"></h3>
+          <button id="play-next" class="primary">Play next now</button
+          ><button id="cancel-next">Cancel next</button>
+        </div>
+      </section>
+    </main>
+    <footer>PRIVATE LIBRARY · HOME NETWORK</footer>
+    <dialog id="details">
+      <button id="close-details" class="close" aria-label="Close details">
+        ✕</button
+      ><img id="detail-art" src="/web/assets/card.png" alt="" />
+      <div class="detail-copy">
+        <p id="detail-kind" class="eyebrow"></p>
+        <h2 id="detail-title"></h2>
+        <p id="detail-meta" class="metadata"></p>
+        <p id="detail-description"></p>
+        <p id="detail-subtitles" class="subtitle-label"></p>
+        <div class="actions">
+          <button id="detail-play" class="primary">▶ Play on TV</button
+          ><button id="restart" hidden>Start over</button>
+        </div>
+        <label for="playback-mode">Playback</label>
+        <select id="playback-mode"><option value="auto">Automatic</option><option value="compatible">Compatible H.264/AAC</option><option value="original">Original file</option></select>
+        <section id="episodes" hidden>
+          <label for="season">Episodes</label
+          ><select id="season"></select>
+          <div id="episode-list"></div>
+        </section>
+      </div>
+    </dialog>
+    <dialog id="watching">
+      <p class="eyebrow">STILL WITH US?</p>
+      <h2>Are you still watching?</h2>
+      <p>
+        Three titles have played automatically. Continue watching to start the
+        next one.
+      </p>
+      <button id="confirm-next" class="primary">Yes, keep watching</button
+      ><button id="finish-watching">Stop autoplay</button>
+    </dialog>
+  </body>
+</html>

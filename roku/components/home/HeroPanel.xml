@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="HeroPanel" extends="Group">
+  <interface>
+    <field id="content" type="node" onChange="onContent" />
+    <field id="playRequested" type="integer" alwaysNotify="true" />
+    <field id="exitUp" type="integer" alwaysNotify="true" />
+    <field id="exitDown" type="integer" alwaysNotify="true" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/HomeActions.brs" />
+  <script type="text/brightscript" uri="HeroPanel.brs" />
+  <children>
+    <Poster id="artA" translation="[320,-78]" width="960" height="432"
+      loadWidth="960" loadHeight="432" loadDisplayMode="scaleToZoom"
+      uri="pkg:/images/hero-fallback.png" />
+    <Poster id="artB" translation="[320,-78]" width="960" height="432"
+      loadWidth="960" loadHeight="432" loadDisplayMode="scaleToZoom" opacity="0" />
+    <Poster translation="[0,-78]" width="1280" height="432" uri="pkg:/images/hero-shade.png" />
+    <Group translation="[64,0]">
+      <Label id="title" width="660" height="90" wrap="true" numLines="2" color="0xF3F7FFFF">
+        <Font uri="pkg:/fonts/DejaVuSans-Bold.ttf" role="font" size="38" />
+      </Label>
+      <Label id="metadata" translation="[0,100]" width="640" height="28" color="0xBAC8DBFF">
+        <Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="20" />
+      </Label>
+      <Label id="description" translation="[0,138]" width="630" height="58" wrap="true" numLines="2"
+        color="0xC6CEDAFF"><Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="20" /></Label>
+      <Group id="playAction" translation="[0,214]">
+        <Rectangle id="playRing" translation="[-3,-3]" width="168" height="50" color="0x80BAFFFF" opacity="0" />
+        <Rectangle id="playFill" width="162" height="44" color="0xE0E7F0FF" />
+        <Label id="actionLabel" width="162" height="44" text="▶  Play" horizAlign="center" vertAlign="center" color="0x101722FF">
+          <Font uri="pkg:/fonts/DejaVuSans-Bold.ttf" role="font" size="21" />
+        </Label>
+      </Group>
+    </Group>
+    <Timer id="artDelay" duration="0.12" repeat="false" />
+    <Animation id="crossfade" duration="0.16" easeFunction="linear">
+      <FloatFieldInterpolator id="fadeOut" key="[0,1]" keyValue="[1,0]" fieldToInterp="artA.opacity" />
+      <FloatFieldInterpolator id="fadeIn" key="[0,1]" keyValue="[0,1]" fieldToInterp="artB.opacity" />
+    </Animation>
+  </children>
+</component>

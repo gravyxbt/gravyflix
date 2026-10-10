@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="PrefetchTask" extends="Task">
+  <interface>
+    <field id="baseUrl" type="string" />
+    <field id="movieId" type="integer" />
+    <field id="cancelled" type="boolean" value="false" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/PlaybackHttp.brs" />
+  <script type="text/brightscript" uri="PrefetchTask.brs" />
+</component>

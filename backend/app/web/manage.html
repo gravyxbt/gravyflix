@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#101117" />
+    <title>Gravyflix · Manage your server</title>
+    <link rel="stylesheet" href="/web/manage.css?v=2" />
+    <script type="module" src="/web/manage.js?v=3"></script>
+  </head>
+  <body>
+    <aside>
+      <a class="brand" href="/" aria-label="Watch Gravyflix"
+        ><img src="/web/assets/logo.png" alt="Gravyflix"
+      /></a>
+      <p class="overline">SERVER MANAGER</p>
+      <nav aria-label="Management">
+        <button data-page="overview" aria-current="page">Overview</button
+        ><button data-page="library">Media library</button
+        ><button data-page="artwork">
+          Artwork review <span id="review-count"></span></button
+        ><button data-page="subtitles">Subtitles</button
+        ><button data-page="intros">Skip intros</button
+        ><button data-page="credits">Movie credits</button
+        ><button data-page="playback">Playback diagnostics</button
+        ><button data-page="settings">Server settings</button
+        ><button data-page="setup">Setup & devices</button>
+      </nav>
+      <a class="watch-link" href="/">↗ Open Gravyflix</a>
+      <p class="sidebar-note">
+        Your media. Your server.<br />Your home network.
+      </p>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <p class="overline">GRAVYFLIX / MANAGEMENT</p>
+          <h1 id="page-title">Overview</h1>
+        </div>
+        <span class="server-state" id="server-state">Connecting…</span>
+      </header>
+      <div id="notice" role="status" aria-live="polite" hidden></div>
+      <div id="job" role="status" aria-live="polite" hidden></div>
+      <section id="overview" class="page">
+        <div class="welcome">
+          <div>
+            <span class="tag">HOME CINEMA, SIMPLIFIED</span>
+            <h2>A good home for<br />your entire library.</h2>
+            <p>
+              Add your files. We’ll handle the shelves, artwork,<br />subtitles,
+              and playback preparation.
+            </p>
+            <button class="primary" data-action="scan">Scan library</button
+            ><a class="button secondary" href="/">Browse & watch ↗</a>
+          </div>
+          <div class="welcome-art">
+            <span>G</span><small>PRIVATE · LOCAL · YOURS</small>
+          </div>
+        </div>
+        <div id="stats" class="stats"></div>
+        <div class="two-columns">
+          <article class="panel">
+            <h2>Your server</h2>
+            <dl id="server-details"></dl>
+          </article>
+          <article class="panel">
+            <h2>Library services</h2>
+            <div id="service-details"></div>
+            <p class="muted">
+              Automatic matching stays conservative. Ambiguous titles appear in
+              Artwork review for your approval.
+            </p>
+          </article>
+        </div>
+      </section>
+      <section id="playback" class="page" hidden>
+        <div class="section-bar"><p id="playback-summary"></p><button id="playback-export">Download diagnostics</button></div>
+        <p id="playback-limits" class="muted"></p>
+        <div id="playback-list"></div>
+      </section>
+      <section id="library" class="page" hidden>
+        <div class="section-bar">
+          <p>Movies and shows, grouped as they appear on your TV.</p>
+          <button class="primary" data-action="scan">Scan library</button>
+        </div>
+        <label class="sr-only" for="library-search">Search your library</label
+        ><input
+          id="library-search"
+          type="search"
+          placeholder="Search titles or genres…"
+        />
+        <div id="library-list" class="media-grid"></div>
+      </section>
+      <section id="artwork" class="page" hidden>
+        <div class="section-bar">
+          <p>Choose the correct match for titles that need a second look.</p>
+          <button data-action="artwork/process">Find missing artwork</button>
+        </div>
+        <div id="artwork-list"></div>
+      </section>
+      <section id="subtitles" class="page" hidden>
+        <div class="section-bar">
+          <p>Local tracks, embedded captions, and OpenSubtitles downloads.</p>
+          <button data-action="subtitles/process">Check for subtitles</button>
+        </div>
+        <p class="hint">
+          Downloads use your configured API key and daily budget. Some files
+          have no matching text subtitles; image-based tracks cannot be used as
+          text captions.
+        </p>
+        <label class="sr-only" for="subtitles-search"
+          >Find subtitles by title</label
+        ><input
+          id="subtitles-search"
+          type="search"
+          placeholder="Find a movie or episode…"
+        />
+        <div id="subtitle-list"></div>
+      </section>
+      <section id="intros" class="page" hidden>
+        <div class="section-bar">
+          <p>Review detected intros or correct an episode’s timing.</p>
+          <button data-action="intros/process">Analyze intros</button>
+        </div>
+        <p class="hint">
+          Automatic detection needs matching openings across episodes. Manual
+          times are seconds from the start and apply only to the selected file.
+        </p>
+        <label class="sr-only" for="intros-search">Find an episode</label
+        ><input
+          id="intros-search"
+          type="search"
+          placeholder="Find an episode…"
+        />
+        <div id="intro-list"></div>
+      </section>
+      <section id="credits" class="page" hidden>
+        <div class="section-bar">
+          <p>
+            Show Up next as a movie’s credits begin, rather than at the end of
+            the file.
+          </p>
+          <button data-action="credits/process">Analyze movie endings</button>
+        </div>
+        <p class="hint">
+          Gravyflix automatically reads credit chapters and analyzes ending
+          frames locally. Confident matches are saved; unclear endings keep the
+          final 30-second fallback. The initial library pass takes time. You can
+          review or correct a detected start below as HH:MM:SS. Episodes keep
+          their existing timing.
+        </p>
+        <label class="sr-only" for="credits-search">Find a movie</label
+        ><input id="credits-search" type="search" placeholder="Find a movie…" />
+        <div id="credit-list"></div>
+      </section>
+      <section id="settings" class="page" hidden>
+        <p>
+          Settings are saved to this installation’s .env file. Restart the
+          server to apply changes.
+        </p>
+        <form id="settings-form" class="panel">
+          <div id="setting-fields" class="form-grid"></div>
+          <label class="key-label"
+            >OpenSubtitles API key <span id="key-status" class="muted"></span
+            ><input
+              name="opensubtitles_key"
+              type="password"
+              autocomplete="new-password"
+              placeholder="Leave blank to keep the existing key"
+            /><small
+              >Write-only: saved keys are never sent to your browser.</small
+            ></label
+          ><button class="primary" type="submit">Save settings</button>
+        </form>
+        <div class="panel" id="restart-panel">
+          <h2>Apply saved settings</h2>
+          <p>
+            On this project’s systemd setup, run the command below on the server
+            when nobody is watching. For a foreground server, stop it with
+            Ctrl-C and run scripts/start.sh again.
+          </p>
+          <pre>systemctl --user restart roku-media-server.service</pre>
+          <p>
+            Changing the media folder requires a scan after restarting. Existing
+            media files are never moved or renamed by the dashboard.
+          </p>
+        </div>
+      </section>
+      <section id="setup" class="page" hidden>
+        <div class="two-columns">
+          <article class="panel">
+            <span class="step">01</span>
+            <h2>Add your media</h2>
+            <p>
+              Create a media folder and set its path in Server settings. This
+              server currently reads:
+            </p>
+            <pre id="setup-media"></pre>
+            <p>
+              For reliable matching, include the movie year and use S01E01
+              episode numbers.
+            </p>
+            <pre>
+Movies/Arrival (2016).mp4
+Shows/The Office (2005)/Season 01/
+  The Office (2005) S01E01.mkv</pre>
+            <a href="/manage/guide/media" target="_blank" rel="noopener"
+              >Read the full organizing guide ↗</a
+            >
+          </article>
+          <article class="panel">
+            <span class="step">02</span>
+            <h2>Connect a Roku</h2>
+            <p>
+              Open this dashboard using the server’s LAN address, rather than
+              localhost. The downloaded app will use that same address.
+            </p>
+            <pre id="setup-url"></pre>
+            <button id="download-roku" class="primary">
+              Download Roku app ZIP
+            </button>
+            <p>
+              Enable developer mode: Home ×3, Up ×2, Right, Left, Right, Left,
+              Right. Follow the prompts and set a developer password.
+            </p>
+            <p>
+              Visit http://YOUR_ROKU_IP in a browser. Sign in as
+              <strong>rokudev</strong> with that password. Upload the ZIP
+              through the Development Application Installer.
+            </p>
+            <p>
+              Reinstall after Roku app changes. Backend changes do not require
+              reinstalling the app.
+            </p>
+          </article>
+          <article class="panel">
+            <span class="step">03</span>
+            <h2>Connect a Vizio / Cast TV</h2>
+            <p>
+              Enter the TV’s LAN address and a friendly name in Server settings.
+              Save and restart the server.
+            </p>
+            <p>
+              On your Android phone, open Gravyflix in Chrome. Choose a title
+              and press Play on TV. Your phone remains the remote.
+            </p>
+            <a href="/">Open the watch & cast page ↗</a>
+          </article>
+          <article class="panel">
+            <span class="step">04</span>
+            <h2>Keep everything running</h2>
+            <p>
+              Automatic scanning checks for new files at the configured
+              interval. Artwork, subtitles, and intros are processed in the
+              background.
+            </p>
+            <pre>
+cd ~/roku-media-server
+./scripts/start.sh</pre>
+            <p>
+              For a fresh installation, follow the setup and background-service
+              instructions in the project README.
+            </p>
+            <a href="/manage/guide/setup" target="_blank" rel="noopener"
+              >Read server setup instructions ↗</a
+            >
+            <p class="muted">
+              Keep devices on the same trusted LAN. A VPN may need LAN discovery
+              enabled. No router port forwarding is needed.
+            </p>
+          </article>
+        </div>
+      </section>
+      <footer>GRAVYFLIX · SERVER MANAGER <span id="updated"></span></footer>
+    </main>
+    <dialog id="file-dialog">
+      <button id="close-dialog" class="dialog-close" aria-label="Close details">
+        ×
+      </button>
+      <h2 id="file-title"></h2>
+      <div id="file-details"></div>
+    </dialog>
+  </body>
+</html>

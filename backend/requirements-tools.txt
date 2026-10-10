@@ -1,0 +1,3 @@
+# Optional project-local tools for development; no system packages required.
+nodejs-wheel==24.19.0
+imageio-ffmpeg==0.6.0

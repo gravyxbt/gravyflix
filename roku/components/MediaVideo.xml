@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MediaVideo" extends="Video">
+  <interface>
+    <field id="intro" type="assocarray" onChange="resetIntroControls" />
+  </interface>
+  <script type="text/brightscript" uri="MediaVideo.brs" />
+  <script type="text/brightscript" uri="IntroControls.brs" />
+  <children>
+    <Timer id="skipTimer" duration="10" repeat="false" />
+    <Group id="skipIntro" translation="[988,602]" visible="false">
+      <Rectangle width="244" height="66" color="0xF2F5FAFF" />
+      <Label translation="[16,17]" width="212" height="32" text="Skip Intro   OK" color="0x101722FF">
+        <Font role="font" uri="pkg:/fonts/DejaVuSans-Bold.ttf" size="22" />
+      </Label>
+    </Group>
+    <NextUpOverlay id="nextUp" translation="[788,514]" visible="false" />
+  </children>
+</component>

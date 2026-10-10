@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="HomeView" extends="Group">
+  <interface>
+    <field id="movies" type="array" alwaysNotify="true" onChange="onMoviesChanged" />
+    <field id="statusText" type="string" onChange="onStatus" />
+    <field id="selectedMovie" type="assocarray" alwaysNotify="true" />
+    <field id="playMovie" type="assocarray" alwaysNotify="true" />
+    <field id="refreshRequested" type="integer" alwaysNotify="true" />
+    <function name="focusHome" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/HomeActions.brs" />
+  <script type="text/brightscript" uri="pkg:/source/HomeData.brs" />
+  <script type="text/brightscript" uri="HomeView.brs" />
+  <children>
+    <Rectangle width="1280" height="720" color="0x080D14FF" />
+    <HeroPanel id="hero" translation="[0,78]" visible="false" />
+    <MediaRows id="rows" translation="[56,340]" visible="false" />
+    <TopNavigation id="nav" />
+    <Group id="statusPanel" translation="[64,214]">
+      <Label text="YOUR PERSONAL CINEMA" color="0x8DBDFFFF"><Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="18" /></Label>
+      <Label id="status" translation="[0,44]" width="960" height="220" wrap="true" color="0xDCE6F4FF">
+        <Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="25" />
+      </Label>
+    </Group>
+    <Label id="notice" translation="[64,696]" width="1152" height="24" color="0x9EAFC4FF">
+      <Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="16" />
+    </Label>
+    <Timer id="noticeTimer" duration="3" repeat="false" />
+  </children>
+</component>

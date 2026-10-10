@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="HistoryTask" extends="Task">
+ <interface>
+  <field id="baseUrl" type="string" />
+  <field id="sessionId" type="string" />
+  <field id="snapshot" type="assocarray" alwaysNotify="true" />
+  <field id="cancelled" type="boolean" value="false" />
+ </interface>
+ <script type="text/brightscript" uri="pkg:/source/PlaybackHttp.brs" />
+ <script type="text/brightscript" uri="HistoryTask.brs" />
+</component>

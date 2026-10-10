@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MainScene" extends="Scene">
+  <script type="text/brightscript" uri="pkg:/source/HomeActions.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Config.brs" />
+  <script type="text/brightscript" uri="MainScene.brs" />
+  <script type="text/brightscript" uri="HistoryController.brs" />
+  <script type="text/brightscript" uri="pkg:/source/SubtitleLabels.brs" />
+  <script type="text/brightscript" uri="pkg:/source/AutoplayData.brs" />
+  <script type="text/brightscript" uri="AutoplayController.brs" />
+  <script type="text/brightscript" uri="PrefetchController.brs" />
+  <children>
+    <HomeView id="library" />
+    <ShowBrowser id="showBrowser" visible="false" />
+    <Group id="details" visible="false">
+      <Poster id="poster" translation="[64,80]" width="280" height="420" loadDisplayMode="scaleToFit"
+        loadingBitmapUri="pkg:/images/default-poster.png" failedBitmapUri="pkg:/images/default-poster.png" />
+      <Label id="movieTitle" translation="[392,80]" width="800" height="100" wrap="true" font="font:LargeBoldSystemFont" />
+      <Label id="movieInfo" translation="[392,196]" width="780" height="270" wrap="true" color="0xCBD5E1FF" />
+      <Label id="subtitleHint" translation="[392,474]" width="800" height="28" color="0xA8CBDFFF">
+        <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="20" />
+      </Label>
+      <Label id="audioHint" translation="[392,588]" width="800" height="52" wrap="true" color="0x94A3B8FF" />
+      <Button id="play" translation="[392,510]" text="Play" />
+      <Button id="restart" translation="[680,510]" text="Start over" visible="false" />
+      <Label id="backHint" translation="[64,658]" text="Back  Movies" color="0x94A3B8FF" />
+    </Group>
+    <MediaVideo id="video" width="1280" height="720" visible="false" />
+  </children>
+</component>

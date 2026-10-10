@@ -1,0 +1,16 @@
+[Unit]
+Description=Gravyflix LAN media server
+After=network.target
+
+[Service]
+Type=simple
+# Example installation at ~/gravyflix. Adjust both paths if installed elsewhere.
+WorkingDirectory=%h/gravyflix
+ExecStart=%h/gravyflix/scripts/start.sh
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

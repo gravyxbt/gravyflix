@@ -1,0 +1,42 @@
+# Credentials and local setup
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.netrc
+.npmrc
+# Local library, history, downloaded assets, reports and playback outputs
+/data/*
+!/data/.gitkeep
+/media/*
+!/media/Movies/
+/media/Movies/*
+!/media/Movies/.gitkeep
+/dist/
+*.sqlite*
+*.db
+*.db-*
+*.log
+*.zip
+*.tar
+*.tar.gz
+# Local matching decisions can reveal library contents
+/config/*.json
+!/config/*.example.json
+# Installed dependencies and generated files
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+playwright-report/
+test-results/
+.DS_Store
+.idea/
+.vscode/

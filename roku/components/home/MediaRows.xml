@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MediaRows" extends="Group">
+  <interface>
+    <field id="content" type="node" alias="list.content" />
+    <field id="focusedItem" type="node" alwaysNotify="true" />
+    <field id="selectedItem" type="node" alwaysNotify="true" />
+    <field id="exitUp" type="integer" alwaysNotify="true" />
+    <function name="focusList" />
+    <function name="jumpToRow" />
+  </interface>
+  <script type="text/brightscript" uri="MediaRows.brs" />
+  <children>
+    <RowList id="list" itemComponentName="MovieCard" itemSize="[1168,174]"
+      itemSpacing="[0,4]" rowItemSize="[[240,144]]" rowItemSpacing="[[8,0]]"
+      numRows="2" rowLabelOffset="[[8,6]]" showRowLabel="[true]" showRowCounter="[false]"
+      rowLabelColor="0xDEE8F5FF" rowFocusAnimationStyle="floatingFocus"
+      vertFocusAnimationStyle="fixedFocus" drawFocusFeedback="false">
+      <Font uri="pkg:/fonts/DejaVuSans.ttf" role="rowLabelFont" size="21" />
+    </RowList>
+  </children>
+</component>

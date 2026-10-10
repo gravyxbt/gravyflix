@@ -1,0 +1,31 @@
+name: Source checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Audit tracked publication files
+        run: python scripts/audit-publication.py --tracked
+      - name: Install backend development dependencies
+        run: ./scripts/setup.sh
+      - name: Install media tools on this ephemeral runner
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Backend tests
+        run: make test
+      - name: Install Roku development tooling
+        run: npm ci
+      - name: Roku syntax and UI tests
+        run: make roku-test-ui

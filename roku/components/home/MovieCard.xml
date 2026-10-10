@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MovieCard" extends="Group">
+  <interface>
+    <field id="itemContent" type="node" onChange="onContent" />
+    <field id="width" type="float" />
+    <field id="height" type="float" />
+    <field id="index" type="integer" />
+    <field id="rowIndex" type="integer" />
+    <field id="focusPercent" type="float" onChange="onFocus" />
+    <field id="rowFocusPercent" type="float" onChange="onFocus" />
+    <field id="rowListHasFocus" type="boolean" onChange="onFocus" />
+  </interface>
+  <script type="text/brightscript" uri="MovieCard.brs" />
+  <children>
+    <Group id="tile" translation="[16,12]" scaleRotateCenter="[104,59]">
+      <Rectangle width="208" height="118" color="0x142031FF" />
+      <Poster id="art" width="208" height="118" loadWidth="224" loadHeight="128"
+        loadDisplayMode="scaleToZoom" loadingBitmapUri="pkg:/images/card-fallback.png"
+        failedBitmapUri="pkg:/images/card-fallback.png" />
+      <Poster width="208" height="118" uri="pkg:/images/card-shade.png" />
+      <Label id="title" translation="[12,57]" width="184" height="48" wrap="true" numLines="2"
+        color="0xF1F5FAFF"><Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="18" /></Label>
+      <Group id="progress" translation="[12,107]" visible="false">
+        <Rectangle width="184" height="3" color="0x63718480" />
+        <Rectangle id="played" width="0" height="3" color="0x83BEFFFF" />
+      </Group>
+      <Poster id="ring" translation="[-5,-5]" width="218" height="128"
+        uri="pkg:/images/card-focus.png" opacity="0" />
+    </Group>
+  </children>
+</component>

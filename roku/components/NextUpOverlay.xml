@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="NextUpOverlay" extends="Group">
+  <interface>
+    <field id="item" type="assocarray" onChange="onItem" />
+    <field id="remaining" type="integer" onChange="onCountdown" />
+    <field id="activated" type="integer" alwaysNotify="true" />
+    <field id="dismissed" type="integer" alwaysNotify="true" />
+    <field id="releasedFocus" type="integer" alwaysNotify="true" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/AutoplayData.brs" />
+  <script type="text/brightscript" uri="NextUpOverlay.brs" />
+  <children>
+    <Rectangle width="444" height="158" color="0x101A28F5" />
+    <Rectangle id="focusBar" width="444" height="4" color="0x8BC6FFFF" />
+    <Poster id="art" translation="[14,42]" width="144" height="81" loadWidth="144" loadHeight="81"
+      loadDisplayMode="scaleToFit" uri="pkg:/images/card-fallback.png" failedBitmapUri="pkg:/images/card-fallback.png" />
+    <Label id="countdown" translation="[14,10]" width="416" height="28" color="0x8BC6FFFF">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans-Bold.ttf" size="19" />
+    </Label>
+    <Label id="title" translation="[172,42]" width="256" height="62" wrap="true">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans-Bold.ttf" size="19" />
+    </Label>
+    <Label translation="[172,116]" width="256" height="28" text="OK · Play now    Back · Cancel" color="0xB9C9DDFF">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="14" />
+    </Label>
+  </children>
+</component>
