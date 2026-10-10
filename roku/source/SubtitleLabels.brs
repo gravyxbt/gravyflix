@@ -32,7 +32,11 @@ function SubtitleIndicatorLabel(summary as dynamic, show = false as boolean) as 
         available = summary.episodes_available
         full = summary.episodes_full
         if total = invalid or available = invalid or full = invalid then return "Subtitles: Checking availability"
-        if available = 0 then return "Subtitles: None available yet"
+        if available = 0
+            if summary.episodes_converting <> invalid and summary.episodes_converting > 0 then return "Subtitles: Converting embedded tracks"
+            if summary.episodes_with_embedded_images <> invalid and summary.episodes_with_embedded_images > 0 then return "Subtitles: Embedded tracks need conversion"
+            return "Subtitles: None available yet"
+        end if
         if full = total then return "Subtitles: All " + total.ToStr() + " episodes"
         if full = 0 then return "Subtitles: Forced only on " + available.ToStr() + " of " + total.ToStr() + " episodes"
         return "Subtitles: Full tracks on " + full.ToStr() + " of " + total.ToStr() + " episodes"
@@ -62,6 +66,8 @@ function SubtitleIndicatorLabel(summary as dynamic, show = false as boolean) as 
             return result
         end if
     end if
+    if summary.conversion_pending = true or summary.state = "processing" then return "Subtitles: Converting embedded tracks"
+    if summary.embedded_image_count <> invalid and summary.embedded_image_count > 0 then return "Subtitles: Embedded tracks need conversion"
     if summary.state = "pending" then return "Subtitles: Checking availability"
     if summary.state = "quota_wait" or summary.state = "rate_wait" then return "Subtitles: Not available yet · Download queued"
     if summary.state = "needs_review" then return "Subtitles: Not available · Match needs review"

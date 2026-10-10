@@ -236,7 +236,7 @@ def test_browse_indicator_counts_only_ready_captions(media):
     scan_library();subtitles.SubtitleWorker().run_once()
     catalog=client.get('/api/library/browse').json()
     show=next(i for i in catalog if i['kind']=='show')
-    assert show['subtitle_summary']=={'episode_total':2,'episodes_available':2,'episodes_full':1,'episodes_forced_only':1}
+    assert show['subtitle_summary']=={'episode_total':2,'episodes_available':2,'episodes_full':1,'episodes_forced_only':1,'episodes_converting':0,'episodes_with_embedded_images':0}
     first,second=show['seasons'][0]['episodes']
     assert first['subtitle_summary']['has_full']
     assert second['subtitle_summary']['has_forced'] and not second['subtitle_summary']['has_full']

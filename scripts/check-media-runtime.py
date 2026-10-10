@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline runtime smoke check: real FFmpeg, ffprobe audio fingerprinting and bundled OCR inference."""
+"""Offline runtime smoke check: real FFmpeg, ffprobe audio fingerprinting, DVD subtitle decoder and bundled OCR inference."""
 import json
 import tempfile
 import subprocess
@@ -10,6 +10,8 @@ from app.intros import audio_fingerprint, IntroWorker
 
 
 def main():
+    import av
+    assert av.CodecContext.create('dvdsub', 'r')
     ffmpeg=binary('ffmpeg')
     if not ffmpeg or not binary('ffprobe'):
         raise SystemExit('Install FFmpeg and ffprobe before checking media support.')
@@ -24,6 +26,6 @@ def main():
         analyzer=Analyzer(path,60)
         result=analyzer.sample(0)
         assert isinstance(result,dict) and not result['positive']
-    print('PASS: H.264/AAC encode, ffprobe, frame extraction audio fingerprinting and bundled OCR inference')
+    print('PASS: H.264/AAC encode, ffprobe, frame extraction audio fingerprinting, DVD subtitle decoder and bundled OCR inference')
 
 if __name__=='__main__':main()

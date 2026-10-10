@@ -67,7 +67,7 @@ without it, the app displays `Episode 2`. Use the same show name for every episo
 For these names, the filename supplies the show, season and episode. A season
 folder is helpful for organization but does not override a valid filename token.
 Seasons and episodes sort numerically; only files actually present are listed.
-The Roku shows one show card, then season and episode lists. The Android casting page also groups shows into seasons and episode lists.
+The Roku shows one show card, then season and episode lists. The web casting page on Android, iPhone and iPad also groups shows into seasons and episode lists.
 
 Show names normalize case, spaces, punctuation, and `&`/`and`. Keep any remake year
 consistent: `Example Show (2005)` and `Example Show (2020)` remain separate shows.

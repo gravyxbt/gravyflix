@@ -1,7 +1,7 @@
 # Gravyflix
 
 A private, self-hosted media library for your home network. A Linux or Apple Silicon Mac server stores
-movies and TV episodes; a BrightScript/SceneGraph Roku app and an Android-friendly
+movies and TV episodes; a BrightScript/SceneGraph Roku app and a mobile-friendly
 web remote browse and play them. The phone controls a configured Google Cast/Vizio
 receiver; movie bytes travel from the server to the TV.
 
@@ -128,13 +128,19 @@ unset DEVPASSWORD
 View Roku logs with `telnet ROKU_IP 8085` or `nc ROKU_IP 8085` on the LAN. Do not
 share raw logs without reviewing titles, URLs and network information.
 
-## Android and Vizio/Cast
+## Android, iPhone/iPad and Vizio/Cast
 
 Set `CAST_HOST` to the receiver's address, restart the backend, and open the server
-URL in Android Chrome. Select a title and Play on TV. The phone acts as the remote;
+URL in Chrome on Android, or Safari/Chrome on iPhone or iPad. Keep the device on
+the same home Wi-Fi as the server and TV. No mobile app installation is required.
+Select a title and Play on TV. The phone or tablet acts as the remote;
 its screen does not play the movie. The TV may need Internet access to launch
 Google's hosted receiver even though media stays on the LAN. Only one configured
 Cast receiver is supported initially; multiple Roku clients can use the server.
+
+Casting is handled by the Gravyflix server, so the mobile browser does not need
+a Google Cast extension or browser Cast support. The web interface is intended
+to support iOS; physical iPhone/iPad playback-control testing is still pending.
 
 Shared history is household-wide. Progress saves about every 15 seconds and on
 state changes. Continue Watching points to unfinished regular episodes, not extras.
@@ -186,3 +192,7 @@ ZIPs and old Git history are excluded from this distribution.
 
 Third-party font notices are retained in `roku/fonts/LICENSE.txt`; see
 [Third-party assets](THIRD_PARTY_NOTICES.md). Gravyflix is available under the [MIT license](LICENSE).
+
+Automatic local conversion of embedded DVD subtitles is described in
+[Automatic subtitles](docs/subtitles.md). New rips are processed in the background;
+no manual extraction or OpenSubtitles download allowance is needed for local OCR.

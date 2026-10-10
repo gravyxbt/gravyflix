@@ -64,10 +64,16 @@ function captionLabel(item) {
   if (item.kind === "show")
     return s.episodes_available
       ? `CC · Subtitles on ${s.episodes_available} of ${s.episode_total} episodes`
-      : "No subtitles available yet";
+      : s.episodes_converting
+        ? "Embedded subtitles converting automatically"
+        : s.episodes_with_embedded_images
+          ? "Embedded image subtitles · Conversion required"
+        : "No subtitles available yet";
   if (s.has_full)
     return `CC · Subtitles available${s.languages?.length ? " · " + s.languages.map((x) => ({ eng: "English", spa: "Spanish", fre: "French", ger: "German" })[x] || x.toUpperCase()).join(", ") : ""}`;
   if (s.has_forced) return "CC · Forced subtitles only";
+  if (s.conversion_pending) return "Converting embedded subtitles…";
+  if (s.embedded_image_count) return "Embedded image subtitles · Conversion required";
   return ["pending", "queued", "checking", "processing"].includes(s.state)
     ? "Subtitles being checked"
     : "No subtitles available yet";

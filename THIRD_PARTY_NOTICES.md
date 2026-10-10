@@ -12,3 +12,8 @@ rights and terms of their respective sources; they are not part of this source r
 Python and npm dependencies are referenced by requirements/lockfiles and are not
 vendored. Their individual licenses continue to apply when installed. This project
 uses FFmpeg as an external program; an optional tool download is not included here.
+
+Embedded DVD subtitle decoding uses PyAV (BSD-3-Clause). PyAV binary wheels
+include FFmpeg libraries and their own dependency notices; those upstream
+licenses apply independently of Gravyflix’s MIT license. Neither the wheels
+nor generated subtitle assets are vendored in this repository.

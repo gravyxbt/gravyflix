@@ -1,6 +1,8 @@
 # Gravyflix server dashboard
 
 Open `http://YOUR_SERVER_LAN_IP:8080/manage` on a phone or computer on your home network.
+Use Chrome on Android or Safari/Chrome on iPhone and iPad; no mobile app is required.
+The server handles TV casting. Physical iOS testing is still pending.
 The gear link on the watch page opens the same dashboard. No Roku update is required.
 
 - **Overview:** media counts, storage, playback cache, media-tool checks, and library service status.

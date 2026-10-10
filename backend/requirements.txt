@@ -9,3 +9,6 @@ ffsubsync==0.5.1
 # Bundled local OCR models; CPU inference for automatic movie credits.
 rapidocr==3.9.2
 onnxruntime==1.30.0
+
+# Native Linux/Apple Silicon decoder for embedded DVD subtitle OCR.
+av==18.0.0
