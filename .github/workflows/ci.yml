@@ -30,7 +30,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Install media tools on the Apple Silicon runner
         if: runner.os == 'macOS'
-        run: brew install ffmpeg
+        run: brew install ffmpeg chromaprint
       - name: Validate Apple Silicon environment and login service
         if: runner.os == 'macOS'
         run: |

@@ -15,7 +15,7 @@ Install [Homebrew](https://brew.sh/) using its official instructions if needed.
 Use a native Terminal session, then install Python and both media tools:
 
 ```bash
-brew install python@3.13 ffmpeg
+brew install python@3.13 ffmpeg chromaprint
 python3.13 -c 'import platform; print(platform.machine())'
 # Must print arm64.
 ```
@@ -135,3 +135,8 @@ Roku syntax/UI logic and launch-agent plist validation. Browser checks exercise
 macOS restart guidance. Physical LAN playback, Cast discovery, privacy/firewall
 permissions, sleep behavior and login/logout service lifecycle still need a real
 home Mac test; hosted CI cannot prove those device/network behaviors.
+
+Intro detection uses the standalone `fpcalc` tool from Homebrew’s
+[Chromaprint package](https://formulae.brew.sh/formula/chromaprint) when FFmpeg
+does not include its Chromaprint muxer. Both paths use the same fingerprint
+algorithm and select the first audio track.

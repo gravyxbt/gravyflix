@@ -132,3 +132,35 @@ def test_real_ffmpeg_fingerprints_find_theme_after_different_cold_opens(tmp_path
     assert marker is not None
     assert abs(marker['start']-6)<4
     assert 29 <= marker['end'] <= 34
+
+
+def test_fpcalc_fallback_preserves_algorithm_track_and_unsigned_values(monkeypatch):
+    monkeypatch.setattr(intros, 'binary', lambda name: '/tools/' + name)
+    monkeypatch.setattr(intros, 'has_chromaprint', lambda executable: False)
+    calls = []
+    def command(args):
+        calls.append(args)
+        return b'{"fingerprint": [0, 4294967295, 123]}' if args[0].endswith('fpcalc') else b''
+    result = intros.audio_fingerprint(Path('/media/a movie.mkv'), 400, command)
+    assert struct.unpack('<III', result) == (0, 4294967295, 123)
+    assert calls[0][calls[0].index('-map') + 1] == '0:a:0'
+    assert calls[1][calls[1].index('-algorithm') + 1] == '2'
+    assert calls[1][calls[1].index('-length') + 1] == '400'
+    assert not Path(calls[1][-1]).exists()
+
+
+@pytest.mark.parametrize('payload', [b'{"fingerprint": [-1]}', b'{"fingerprint": [true]}',
+                                     b'{"fingerprint": [4294967296]}', b'{"fingerprint": "invalid"}'])
+def test_fpcalc_invalid_output_rejected(monkeypatch, payload):
+    monkeypatch.setattr(intros, 'binary', lambda name: name)
+    monkeypatch.setattr(intros, 'has_chromaprint', lambda executable: False)
+    with pytest.raises(ValueError, match='Invalid audio fingerprint'):
+        intros.audio_fingerprint(Path('/media/video.mkv'), 600,
+                                 lambda args: payload if args[0] == 'fpcalc' else b'')
+
+
+def test_missing_fpcalc_explains_installation(monkeypatch):
+    monkeypatch.setattr(intros, 'binary', lambda name: 'ffmpeg' if name == 'ffmpeg' else None)
+    monkeypatch.setattr(intros, 'has_chromaprint', lambda executable: False)
+    with pytest.raises(RuntimeError, match='brew install chromaprint'):
+        intros.audio_fingerprint(Path('/media/video.mkv'), 600, lambda args: b'')

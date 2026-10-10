@@ -7,7 +7,7 @@ if [[ "$(uname -s)" != Darwin ]]; then
 fi
 python_bin="${PYTHON_BIN:-python3.13}"
 if ! command -v "$python_bin" >/dev/null 2>&1; then
-    echo "Install native Python and media tools first: brew install python@3.13 ffmpeg" >&2
+    echo "Install native Python and media tools first: brew install python@3.13 ffmpeg chromaprint" >&2
     exit 1
 fi
 "$python_bin" - <<'PY'
@@ -34,9 +34,9 @@ if ! .venv/bin/python - <<'PY'
 import sys
 sys.path.insert(0, 'backend')
 from app.media_tools import binary
-missing = [name for name in ('ffmpeg', 'ffprobe') if not binary(name)]
+missing = [name for name in ('ffmpeg', 'ffprobe', 'fpcalc') if not binary(name)]
 if missing:
-    raise SystemExit('Missing ' + ', '.join(missing) + '. Run: brew install ffmpeg, or ./scripts/setup-media-tools.sh')
+    raise SystemExit('Missing ' + ', '.join(missing) + '. Run: brew install ffmpeg chromaprint')
 PY
 then exit 1; fi
 printf '%s\n' 'Setup complete. Edit .env if needed, then run ./scripts/start.sh.' 'Open the printed LAN URL to manage your library and download the Roku package.'

@@ -1,4 +1,6 @@
 """Background intro analysis, persistent per-file markers and manual corrections."""
+from functools import lru_cache
+import tempfile
 import hashlib
 import json
 import logging
@@ -13,6 +15,40 @@ from .database import connection
 from .media_tools import binary
 from .intro_detection import VERSION, chapter_marker, pair_match, consensus
 log = logging.getLogger('media')
+
+
+@lru_cache(maxsize=8)
+def has_chromaprint(executable):
+    result = subprocess.run([executable, '-hide_banner', '-muxers'],
+                            capture_output=True, text=True, check=True, timeout=10)
+    return any('chromaprint' in line.split() for line in result.stdout.splitlines())
+
+
+def audio_fingerprint(path, duration, command):
+    """Same Chromaprint algorithm and first audio track on Linux and native Macs."""
+    executable = binary('ffmpeg')
+    if not executable:
+        raise RuntimeError('FFmpeg unavailable')
+    args = [executable, '-v', 'error', '-nostdin', '-threads', '1', '-i', str(path),
+            '-t', str(duration), '-map', '0:a:0', '-vn', '-ac', '1', '-ar', '11025']
+    if has_chromaprint(executable):
+        return command(args + ['-f', 'chromaprint', '-algorithm', '1', '-fp_format', 'raw', 'pipe:1'])
+    calculator = binary('fpcalc')
+    if not calculator:
+        raise RuntimeError('FFmpeg lacks Chromaprint. Install fpcalc: brew install chromaprint on macOS.')
+    # Bound disk usage to ten minutes of mono PCM; keep subprocess cancellation
+    # and timeouts through the worker's command method for both tools.
+    with tempfile.TemporaryDirectory(prefix='gravyflix-intro-') as folder:
+        audio = str(Path(folder) / 'audio.wav')
+        command(args + ['-c:a', 'pcm_s16le', '-f', 'wav', audio])
+        # fpcalc numbers algorithms from 1; FFmpeg uses the zero-based enum.
+        result = json.loads(command([calculator, '-algorithm', '2', '-length', str(duration),
+                                     '-raw', '-json', audio]))
+        values = result.get('fingerprint') if isinstance(result, dict) else None
+        if (not isinstance(values, list) or len(values) > 25000
+                or any(type(v) is not int or not 0 <= v < 2**32 for v in values)):
+            raise ValueError('Invalid audio fingerprint')
+        return struct.pack('<' + 'I' * len(values), *values)
 
 
 def initialize():
@@ -97,11 +133,7 @@ class IntroWorker:
     def fingerprint(self,row,sig):
         with connection() as db: cached=db.execute('SELECT data FROM intro_fingerprints WHERE signature=?',(sig,)).fetchone()
         if cached:return list(struct.unpack('<'+'I'*(len(cached['data'])//4),cached['data']))
-        executable=binary('ffmpeg')
-        if not executable:raise RuntimeError('FFmpeg unavailable')
-        out=self.command([executable,'-v','error','-nostdin','-threads','1','-i',str(checked(row)),
-            '-t',str(min(600,(row['duration'] or 1500)*.4)),'-map','0:a:0','-vn','-ac','1','-ar','11025',
-            '-f','chromaprint','-algorithm','1','-fp_format','raw','pipe:1'])
+        out=audio_fingerprint(checked(row), min(600,(row['duration'] or 1500)*.4), self.command)
         if len(out)%4 or len(out)>100000:raise ValueError('Invalid audio fingerprint')
         with connection() as db:db.execute('INSERT OR REPLACE INTO intro_fingerprints VALUES(?,?)',(sig,out))
         return list(struct.unpack('<'+'I'*(len(out)//4),out))
