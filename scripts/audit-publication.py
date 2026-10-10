@@ -16,6 +16,7 @@ ROOT_FILES = {'README.md','LICENSE','LICENSE-STATUS.md','THIRD_PARTY_NOTICES.md'
 IGNORED_PARTS = {'.git','.venv','venv','node_modules','__pycache__','.pytest_cache','.github-cache'}
 PATTERNS = {
     'personal home path': re.compile(r'/home/(?!example(?:/|\b)|user(?:/|\b))[A-Za-z0-9_.-]+/'),
+    'personal Mac home path': re.compile(r'/Users/(?!example(?:/|\b)|user(?:/|\b))[A-Za-z0-9_.-]+/'),
     'private LAN address': re.compile(r'\b(?:192\.168\.\d{1,3}\.\d{1,3}|10\.(?:\d{1,3}\.){2}\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})\b'),
     'network adapter identifier': re.compile(r'\bwlx[0-9a-f]{12}\b',re.I),
     'private key material': re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----'),

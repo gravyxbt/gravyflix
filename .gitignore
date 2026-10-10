@@ -40,3 +40,6 @@ test-results/
 .DS_Store
 .idea/
 .vscode/
+
+# Generated macOS login-service definitions contain local paths
+*.plist

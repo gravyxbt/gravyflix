@@ -1,6 +1,6 @@
 # Gravyflix
 
-A private, self-hosted media library for your home network. An Ubuntu server stores
+A private, self-hosted media library for your home network. A Linux or Apple Silicon Mac server stores
 movies and TV episodes; a BrightScript/SceneGraph Roku app and an Android-friendly
 web remote browse and play them. The phone controls a configured Google Cast/Vizio
 receiver; movie bytes travel from the server to the TV.
@@ -22,10 +22,15 @@ security boundary. Do not forward its port or expose its management dashboard pu
 
 ## Server setup
 
-Requirements: Ubuntu/Linux, Python 3.11+, FFmpeg and ffprobe. Node.js/npm are needed
+Requirements: Ubuntu/Linux with Python 3.11+, or Apple Silicon macOS 14+ with native
+Python 3.13; FFmpeg and ffprobe on both. Node.js/npm are needed
 for Roku compiler/browser development checks, not for running the Python backend.
 
-Extract or clone the source into `~/gravyflix`, then:
+Apple Silicon users: follow [macOS setup](docs/macos.md) for native Python, FFmpeg,
+Mac network permissions and the optional login service. Windows and Intel Macs are
+not supported by this setup yet.
+
+On Linux, extract or clone the source into `~/gravyflix`, then:
 
 ```bash
 cd ~/gravyflix
@@ -137,7 +142,8 @@ See [Playback and history](docs/playback.md) for conversion and diagnostics limi
 
 ## Optional background service
 
-The example user-level systemd unit assumes `~/gravyflix`; adjust its two paths if
+On macOS, use the optional [login service](docs/macos.md#optional-login-service).
+The Linux user-level systemd unit assumes `~/gravyflix`; adjust its two paths if
 installed elsewhere. Install it only after foreground playback works:
 
 ```bash

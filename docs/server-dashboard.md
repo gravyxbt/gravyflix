@@ -21,6 +21,10 @@ restart when nobody is watching:
 systemctl --user restart roku-media-server.service
 ```
 
+On an Apple Silicon Mac with the optional login service, run
+`python3 scripts/macos-service.py restart` from the project directory. The dashboard
+shows the restart command for its server operating system.
+
 If running in the foreground, stop with Ctrl-C and run `./scripts/start.sh` again.
 If your service uses another name, restart your own service. Scan the library after changing
 the media folder. Folder changes do not move or delete files; missing old paths are hidden

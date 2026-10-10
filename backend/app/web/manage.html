@@ -174,12 +174,11 @@
         </form>
         <div class="panel" id="restart-panel">
           <h2>Apply saved settings</h2>
-          <p>
-            On this project’s systemd setup, run the command below on the server
-            when nobody is watching. For a foreground server, stop it with
-            Ctrl-C and run scripts/start.sh again.
+          <p id="restart-description">
+            Restart the server when nobody is watching. For a foreground server,
+            use Ctrl-C and run ./scripts/start.sh again.
           </p>
-          <pre>systemctl --user restart roku-media-server.service</pre>
+          <pre id="restart-command"></pre>
           <p>
             Changing the media folder requires a scan after restarting. Existing
             media files are never moved or renamed by the dashboard.

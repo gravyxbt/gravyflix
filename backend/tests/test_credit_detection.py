@@ -77,7 +77,8 @@ def test_ocr_recognizes_real_rendered_cards_locally(tmp_path):
     import numpy as np
     from PIL import Image,ImageDraw,ImageFont
     from app.credit_detection import Analyzer
-    font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',28)
+    from pathlib import Path
+    font=ImageFont.truetype(str(Path(__file__).resolve().parents[2]/'roku/fonts/DejaVuSans.ttf'),28)
     image=Image.new('RGB',(960,540),'black');draw=ImageDraw.Draw(image)
     draw.text((260,180),'Written and Directed by',font=font,fill='white')
     draw.text((345,240),'Jane Smith',font=font,fill='white')

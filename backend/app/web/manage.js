@@ -489,6 +489,9 @@ async function loadSettings() {
   $("key-status").textContent = settings.saved_key_configured
     ? "· A key is saved"
     : "· No key saved";
+  $("restart-command").textContent = settings.restart_command || "./scripts/start.sh";
+  if (settings.restart_description)
+    $("restart-description").textContent = settings.restart_description;
   if (settings.environment_overrides.length)
     notice(
       "These process environment variables override saved settings: " +

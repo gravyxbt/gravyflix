@@ -185,7 +185,10 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--path',required=True);parser.add_argument('--duration',type=float,required=True);parser.add_argument('--timeout',type=int,default=300)
     args=parser.parse_args()
     try:
-        os.nice(10)  # One low-priority CPU worker; preserve playback resources.
+        try:
+            os.nice(10)  # One low-priority CPU worker; preserve playback resources.
+        except OSError:
+            logging.getLogger('media').warning('CREDITS: Could not lower worker priority; continuing with bounded analysis')
         analyzer=Analyzer(Path(args.path),args.timeout)
         result=detect(args.duration,analyzer.sample)
         print(json.dumps(result),flush=True)

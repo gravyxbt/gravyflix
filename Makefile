@@ -25,3 +25,11 @@ public-audit:
 	python3 scripts/audit-publication.py
 source-package:
 	python3 scripts/package-source.py --output ../gravyflix-source.zip
+
+.PHONY: setup-macos macos-service-install macos-service-status
+setup-macos:
+	./scripts/setup-macos.sh
+macos-service-install:
+	.venv/bin/python scripts/macos-service.py install
+macos-service-status:
+	.venv/bin/python scripts/macos-service.py status

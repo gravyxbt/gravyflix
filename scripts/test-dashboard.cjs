@@ -133,6 +133,8 @@ const { chromium, expect } = require("@playwright/test");
             values,
             saved_key_configured: true,
             environment_overrides: [],
+            restart_command: "python3 scripts/macos-service.py restart",
+            restart_description: "Restart the macOS login service from the project folder.",
           };
       } else if (endpoint === "artwork/choose") {
         choice = req.postDataJSON();
@@ -183,6 +185,8 @@ const { chromium, expect } = require("@playwright/test");
     await page
       .getByRole("button", { name: "Server settings", exact: true })
       .click();
+    await expect(page.locator("#restart-command")).toContainText("macos-service.py restart");
+    await expect(page.locator("#restart-description")).toContainText("macOS login service");
     await page.locator("[name=CAST_NAME]").fill("Bedroom TV");
     await page.locator("[name=opensubtitles_key]").fill("new-secret");
     await page.getByRole("button", { name: "Save settings" }).click();

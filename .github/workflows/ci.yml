@@ -1,10 +1,14 @@
 name: Source checks
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -21,8 +25,20 @@ jobs:
         run: python scripts/audit-publication.py --tracked
       - name: Install backend development dependencies
         run: ./scripts/setup.sh
-      - name: Install media tools on this ephemeral runner
+      - name: Install media tools on the Linux runner
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install media tools on the Apple Silicon runner
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+      - name: Validate Apple Silicon environment and login service
+        if: runner.os == 'macOS'
+        run: |
+          .venv/bin/python scripts/macos-service.py print > /tmp/gravyflix-launch-agent.plist
+          plutil -lint /tmp/gravyflix-launch-agent.plist
+          .venv/bin/python -c "import platform; assert platform.machine() == 'arm64'"
+      - name: Exercise media tools and bundled OCR models
+        run: PYTHONPATH=backend .venv/bin/python scripts/check-media-runtime.py
       - name: Backend tests
         run: make test
       - name: Install Roku development tooling

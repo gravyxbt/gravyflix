@@ -142,3 +142,12 @@ def test_overview_and_library_empty(client):
     assert result.status_code==200
     assert result.json()['files']==0
     assert client.get('/api/manage/library',headers=HEADERS).json()=={'catalog':[],'files':[]}
+
+@pytest.mark.parametrize('host,command',[('darwin','python3 scripts/macos-service.py restart'),
+                                        ('linux','systemctl --user restart roku-media-server.service')])
+def test_platform_specific_restart_instructions(client,monkeypatch,host,command):
+    monkeypatch.setattr(management.sys,'platform',host)
+    response=client.get('/api/manage/settings',headers=HEADERS).json()
+    assert response['restart_command']==command
+    assert 'foreground server' in response['restart_description']
+    assert response['platform']==('macOS' if host=='darwin' else 'Linux')

@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import shutil
+import sys
 import tempfile
 import threading
 import time
@@ -222,7 +223,9 @@ def settings():
     values = {k: saved.get(k, running[k]) or '' for k in DEFAULTS}
     return dict(values=values, running=running, key_configured=bool(config.OPENSUBTITLES_API_KEY),
         saved_key_configured=bool(saved.get('OPENSUBTITLES_API_KEY', config.OPENSUBTITLES_API_KEY)),
-        restart_command='systemctl --user restart roku-media-server.service',
+        restart_command=('python3 scripts/macos-service.py restart' if sys.platform == 'darwin' else 'systemctl --user restart roku-media-server.service'),
+        restart_description=('For the optional macOS login service, run this command from the project folder when nobody is watching. For a foreground server, use Ctrl-C and run ./scripts/start.sh again.' if sys.platform == 'darwin' else 'For the optional Linux user service, run this command when nobody is watching. For a foreground server, use Ctrl-C and run ./scripts/start.sh again.'),
+        platform='macOS' if sys.platform == 'darwin' else 'Linux',
         environment_overrides=[k for k in DEFAULTS if k in config.ENVIRONMENT_KEYS and saved.get(k) is not None and os.environ[k] != saved[k]])
 
 
