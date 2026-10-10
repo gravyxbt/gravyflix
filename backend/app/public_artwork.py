@@ -16,6 +16,9 @@ ROOT=config.ROOT
 SOURCES=ROOT/'data/artwork-source';ART=ROOT/'data/artwork'
 INDEX=ROOT/'data/artwork/index.json';REPORT=ROOT/'data/artwork-reports/matching.json'
 STATE=ROOT/'data/artwork-reports/attempts.json'
+MATCH_VERSION=2
+ERROR_RETRY_SECONDS=300
+ERROR_RETRY_MAX_SECONDS=3600
 
 @contextmanager
 def import_lock():
@@ -48,6 +51,29 @@ def fetch(url):
 def norm(value):
     value=unicodedata.normalize('NFKD',value).encode('ascii','ignore').decode().lower().replace('&','and')
     return re.sub(r'[^a-z0-9]','',value)
+
+def artwork_query(title):
+    """Strip trailing release editions, keeping meaningful title words and sequel numbers."""
+    query=re.sub(r'^\d{1,3}-\d{1,3}\s+', '', title)
+    query=re.sub(r'\s*\((?:19|20)\d{2}\)\s*$', '', query).strip()
+    edition=r"(?:unrated|un[ -]?cut|extended(?:[ -]+(?:cut|edition))?|director['’]?s[ -]+cut|theatrical[ -]+cut|remastered|special[ -]+edition|collector['’]?s[ -]+edition)"
+    while True:
+        cleaned=re.sub(r'(?i)\s+[\[(]?'+edition+r'[\])]?\s*$', '', query).strip()
+        if cleaned==query or not cleaned or norm(cleaned) in {'the','a','an'}: return query
+        query=cleaned
+
+def search_queries(query,year,kind):
+    queries=[query]
+    # Some release collections label the first film "I"; only use this fallback
+    # with a known movie year, and still require an exact title/year match.
+    if kind=='movie' and year is not None and re.search(r'\s+I$',query):
+        queries.append(re.sub(r'\s+I$', '', query))
+    return queries
+
+def retry_at(prior):
+    report=prior.get('report',{})
+    default=ERROR_RETRY_SECONDS if report.get('status')=='error' else config.ARTWORK_RETRY_SECONDS
+    return prior.get('next_retry_at',prior.get('time',0)+default)
 
 def search(query,kind):
     soup=BeautifulSoup(fetch('https://www.themoviedb.org/search/'+kind+'?'+urllib.parse.urlencode({'query':query})), 'html.parser')
@@ -139,26 +165,32 @@ def _run(refresh=()):
         if item['title'] in {'ETRG','RARBG COM','My Media Test'}:
             report.append({'id':key,'title':item['title'],'status':'local_clip'});continue
         override=overrides.get(key,{})
-        query=override.get('query') or re.sub(r'^\d-\d\s+','',item['title'])
-        query=re.sub(r'\s*\((?:19|20)\d{2}\)\s*$', '', query).strip()
+        query=override.get('query') or artwork_query(item['title'])
         show_year=re.search(r'\(((?:19|20)\d{2})\)\s*$',item['title']) if item['kind']=='show' else None
         year=override.get('year',int(show_year[1]) if show_year else item.get('year'))
         kind=override.get('kind','tv' if item['kind']=='show' else 'movie')
-        signature=json.dumps([query,year,kind,override],sort_keys=True)
+        signature=json.dumps([MATCH_VERSION,query,year,kind,override],sort_keys=True)
         prior=attempts.get(key,{})
-        if key not in refresh and prior.get('signature')==signature and time.time()-prior.get('time',0)<config.ARTWORK_RETRY_SECONDS:
+        if key not in refresh and prior.get('signature')==signature and time.time()<retry_at(prior):
             if prior.get('report'):report.append(prior['report'])
             continue
         attempts[key]={'signature':signature,'time':time.time()}
         try:
-            candidates=[] if override.get("url") else search(query,kind)
-            exact=[m for m in candidates if norm(m['title'])==norm(query) and (year is None or m['year']==year)]
+            candidates=[];exact=[]
+            if not override.get('url'):
+                for search_query in search_queries(query,year,kind):
+                    found=search(search_query,kind)
+                    for match in found:
+                        if match['url'] not in {m['url'] for m in candidates}:candidates.append(match)
+                    exact=[m for m in found if norm(m['title'])==norm(search_query) and (year is None or m['year']==year)]
+                    if exact:break
             if override.get('url'):
                 match={'url':override['url'],'title':override.get('matched_title',query),'year':year}
             elif len(exact)==1:match=exact[0]
             else:
                 report.append({'id':key,'title':item['title'],'query':query,'year':year,'status':'needs_review','candidates':candidates})
                 attempts[key]['report']=report[-1]
+                attempts[key]['next_retry_at']=attempts[key]['time']+config.ARTWORK_RETRY_SECONDS
                 write_json(STATE,attempts)
                 print('REVIEW',key,query,[(m['title'],m['year']) for m in candidates[:4]],flush=True);continue
             index[key]=download(match)
@@ -166,7 +198,11 @@ def _run(refresh=()):
             attempts.pop(key,None)
             print('MATCH',key,query,'->',match['title'],match['year'],flush=True)
         except Exception as exc:
-            report.append({'id':key,'title':item['title'],'status':'error','error':str(exc)})
+            failures=prior.get('failures',0)+1 if prior.get('signature')==signature else 1
+            delay=min(ERROR_RETRY_MAX_SECONDS,ERROR_RETRY_SECONDS*2**min(failures-1,4))
+            attempts[key].update(failures=failures,next_retry_at=time.time()+delay)
+            report.append({'id':key,'title':item['title'],'status':'error','error':str(exc),
+                           'next_retry_at':attempts[key]['next_retry_at']})
             print('ERROR',key,query,str(exc),flush=True)
         if report and report[-1]['id']==key:attempts[key]['report']=report[-1]
         write_json(STATE,attempts)

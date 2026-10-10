@@ -125,3 +125,65 @@ def test_worker_shutdown_terminates_active_import():
     process=Process();worker.process=process
     worker.close()
     assert process.stopped
+
+@pytest.mark.parametrize('title,expected',[
+    ('Saw II UNRATED','Saw II'),('Film (2020)','Film'),
+    ('Film Extended Cut [UNRATED]','Film'),("Film Director's Cut",'Film'),
+    ('Film Remastered Special Edition','Film'),('The Unrated','The Unrated'),
+    ('Uncut Gems','Uncut Gems'),('Unrated','Unrated'),('Rocky IV','Rocky IV'),
+])
+def test_artwork_release_query(title,expected):
+    assert importer.artwork_query(title)==expected
+
+
+def test_first_installment_alias_requires_known_movie_year(automatic,monkeypatch):
+    items,calls=automatic
+    items[:]=[dict(id=7,title='Example I UNRATED',year=2016,kind='movie')]
+    searches=[]
+    def search(query,kind):
+        searches.append(query)
+        return [] if query.endswith(' I') else [dict(title='Example',year=2016,url='https://www.themoviedb.org/movie/1')]
+    monkeypatch.setattr(importer,'search',search)
+    importer.run()
+    assert searches==['Example I','Example'] and calls[0]['title']=='Example'
+    assert importer.search_queries('Example II',2016,'movie')==['Example II']
+    assert importer.search_queries('Example I',None,'movie')==['Example I']
+    assert importer.search_queries('Example I',2016,'tv')==['Example I']
+
+
+def test_alias_keeps_year_check_and_ambiguity_guard(automatic,monkeypatch):
+    items,calls=automatic
+    items[:]=[dict(id=7,title='Example I UNRATED',year=2016,kind='movie')]
+    monkeypatch.setattr(importer,'search',lambda q,k:[dict(title='Example',year=2020,url='wrong')])
+    importer.run()
+    assert not calls and json.loads(importer.REPORT.read_text())[0]['status']=='needs_review'
+
+
+def test_errors_retry_soon_and_back_off_without_losing_choices(automatic,monkeypatch):
+    _,calls=automatic
+    now=[100000.0]
+    monkeypatch.setattr(importer.time,'time',lambda:now[0])
+    searches=[]
+    def offline(query,kind):
+        searches.append(query)
+        raise TimeoutError('temporary connection failure')
+    monkeypatch.setattr(importer,'search',offline)
+    importer.run()
+    state=json.loads(importer.STATE.read_text())['7']
+    assert state['next_retry_at']==now[0]+300 and state['failures']==1
+    importer.run()
+    assert len(searches)==1
+    now[0]+=300
+    importer.run()
+    state=json.loads(importer.STATE.read_text())['7']
+    assert len(searches)==2 and state['next_retry_at']==now[0]+600
+    now[0]+=600
+    monkeypatch.setattr(importer,'search',lambda q,k:[dict(title=q,year=2016,url='https://www.themoviedb.org/movie/1')])
+    importer.run()
+    assert len(calls)==1 and '7' not in json.loads(importer.STATE.read_text())
+    assert json.loads(importer.REPORT.read_text())==[]
+
+
+def test_legacy_errors_get_shorter_retry_but_reviews_stay_daily():
+    assert importer.retry_at({'time':100,'report':{'status':'error'}})==400
+    assert importer.retry_at({'time':100,'report':{'status':'needs_review'}})==100+config.ARTWORK_RETRY_SECONDS
