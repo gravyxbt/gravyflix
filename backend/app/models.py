@@ -33,6 +33,11 @@ class Movie(BaseModel):
     landscape_url: str | None = None
     artwork_source: str | None = None
     genres: list[str] = Field(default_factory=list)
+    description: str | None = None
+    description_scope: str | None = None
+    cast: list[str] = Field(default_factory=list)
+    cast_scope: str | None = None
+    metadata_source: str | None = None
     stream_url: str
     stream_format: str
     series_info: dict | None = None

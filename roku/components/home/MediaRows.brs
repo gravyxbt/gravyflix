@@ -16,7 +16,11 @@ sub onFocused()
 end sub
 
 sub onSelected()
-    m.top.selectedItem = itemAt(m.list.rowItemSelected)
+    item = itemAt(m.list.rowItemSelected)
+    if item = invalid then return
+    m.top.selectedItem = item
+    ' A mutable content node is data, never a selection event.
+    m.top.selectionRequested++
 end sub
 
 sub focusList()

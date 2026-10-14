@@ -3,6 +3,7 @@
   <interface>
     <field id="content" type="node" alias="list.content" />
     <field id="focusedItem" type="node" alwaysNotify="true" />
+    <field id="selectionRequested" type="integer" alwaysNotify="true" />
     <field id="selectedItem" type="node" alwaysNotify="true" />
     <field id="exitUp" type="integer" alwaysNotify="true" />
     <function name="focusList" />

@@ -8,6 +8,7 @@
     <field id="rowIndex" type="integer" />
     <field id="focusPercent" type="float" onChange="onFocus" />
     <field id="rowFocusPercent" type="float" onChange="onFocus" />
+    <field id="gridHasFocus" type="boolean" onChange="onFocus" />
     <field id="rowListHasFocus" type="boolean" onChange="onFocus" />
   </interface>
   <script type="text/brightscript" uri="MovieCard.brs" />

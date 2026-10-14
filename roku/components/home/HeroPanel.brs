@@ -94,3 +94,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
     end if
     return false
 end function
+
+sub refreshAction()
+    if m.top.content <> invalid then m.top.FindNode("actionLabel").text = HomeActionLabel(m.top.content.movieData)
+end sub

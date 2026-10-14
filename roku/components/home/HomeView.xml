@@ -3,10 +3,13 @@
   <interface>
     <field id="movies" type="array" alwaysNotify="true" onChange="onMoviesChanged" />
     <field id="statusText" type="string" onChange="onStatus" />
+    <field id="titleRequested" type="integer" alwaysNotify="true" />
+    <field id="playRequested" type="integer" alwaysNotify="true" />
     <field id="selectedMovie" type="assocarray" alwaysNotify="true" />
     <field id="playMovie" type="assocarray" alwaysNotify="true" />
     <field id="refreshRequested" type="integer" alwaysNotify="true" />
     <function name="focusHome" />
+    <function name="updateCachedMovies" />
   </interface>
   <script type="text/brightscript" uri="pkg:/source/HomeActions.brs" />
   <script type="text/brightscript" uri="pkg:/source/HomeData.brs" />
@@ -15,6 +18,7 @@
     <Rectangle width="1280" height="720" color="0x080D14FF" />
     <HeroPanel id="hero" translation="[0,78]" visible="false" />
     <MediaRows id="rows" translation="[56,340]" visible="false" />
+    <SearchView id="search" visible="false" />
     <TopNavigation id="nav" />
     <Group id="statusPanel" translation="[64,214]">
       <Label text="YOUR PERSONAL CINEMA" color="0x8DBDFFFF"><Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="18" /></Label>

@@ -18,6 +18,8 @@ sub onShow()
     if show.backdrop_url <> invalid then m.top.FindNode("showArt").uri = show.backdrop_url
     m.top.FindNode("showTitle").text = show.title
     m.top.FindNode("summary").text = MoviePresentation(show).metadataLine + "  ·  " + SubtitleIndicatorLabel(show.subtitle_summary, true)
+    m.top.FindNode("showDescription").text = TitleSummary(show, 260)
+    m.top.FindNode("showCast").text = TitleCast(show)
     root = CreateObject("roSGNode", "ContentNode")
     for each season in show.seasons
         root.CreateChild("ContentNode").title = season.title
@@ -75,6 +77,7 @@ sub onEpisode()
     index = m.episodes.itemSelected
     if index >= 0 and index < season.episodes.Count()
         m.top.selectedEpisode = season.episodes[index]
+        m.top.episodeRequested++
     end if
 end sub
 

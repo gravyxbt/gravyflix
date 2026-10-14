@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component name="HeroPanel" extends="Group">
   <interface>
+    <function name="refreshAction" />
     <field id="content" type="node" onChange="onContent" />
     <field id="playRequested" type="integer" alwaysNotify="true" />
     <field id="exitUp" type="integer" alwaysNotify="true" />

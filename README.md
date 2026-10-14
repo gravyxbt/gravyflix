@@ -8,6 +8,8 @@ receiver; movie bytes travel from the server to the TV.
 ## Features
 
 - Cinematic Roku and web home screens with artwork, genre shelves and TV seasons.
+- Automatic title summaries and principal cast on movie, series and episode pages.
+  See [title metadata](docs/title-metadata.md) for matching and DVD-order behavior.
 - Shared household Continue Watching, Resume and Start over across Roku and Cast.
 - HTTP byte-range streaming and codec-aware direct play, remuxing and conversion.
 - Automatic public-source artwork matching with a review queue for ambiguous titles.
@@ -124,6 +126,14 @@ export DEVPASSWORD
 make roku-install
 unset DEVPASSWORD
 ```
+
+The top navigation includes Home, Movies, Shows, and Search. Search matches titles,
+cast and genres locally as you type. Press Play/Pause to browse results, OK to open
+a title, and Back to return to the same query and card. See [Roku search](docs/roku-search.md).
+Movies and Shows jump directly to their library shelves. Back
+from a title or series returns to the same row and card without reloading the
+library. Progress refreshes in the background without moving your selection.
+Press Options (*) on the home screen to explicitly scan and refresh.
 
 View Roku logs with `telnet ROKU_IP 8085` or `nc ROKU_IP 8085` on the LAN. Do not
 share raw logs without reviewing titles, URLs and network information.

@@ -12,6 +12,7 @@ from app.database import connection
 from app.models import movie_response
 from app.catalog import build_catalog
 from app.genres import parse_genres, GENRE_VERSION
+from app.title_metadata import METADATA_VERSION, PUBLIC_TITLE, title_fields, season_fields
 ROOT=config.ROOT
 SOURCES=ROOT/'data/artwork-source';ART=ROOT/'data/artwork'
 INDEX=ROOT/'data/artwork/index.json';REPORT=ROOT/'data/artwork-reports/matching.json'
@@ -112,7 +113,7 @@ def download(match):
     poster=next((u for u in images if '/w500/' in u),None)
     backdrop=next((u for u in images if '/w780/' in u),None)
     entry={'matched_title':match['title'],'matched_year':match['year'],'source_url':match['url'],'provider':'TMDB public title page',
-           'genres':parse_genres(soup),'genre_version':GENRE_VERSION}
+           'genres':parse_genres(soup),'genre_version':GENRE_VERSION, **title_fields(soup)}
     if poster:entry['poster']=image_file(poster,'poster')
     if backdrop:
         entry['backdrop']=image_file(backdrop.replace('/w780/','/w1280/'),'backdrop')
@@ -146,6 +147,53 @@ def enrich_genres(index, items):
     for key,entry in index.items():
         if entry.get('genres_error'):errors.append({'id':key,'error':entry['genres_error']})
     write_json(REPORT.parent/'genres.json',errors)
+
+def enrich_metadata(index, items):
+    """Backfill existing matches, reusing cached pages; failures retain good data."""
+    for item in items:
+        key=str(item['id']);entry=index.get(key,{})
+        url=entry.get('source_url','')
+        match=PUBLIC_TITLE.fullmatch(url)
+        if not match:continue
+        changed=False
+        if entry.get('metadata_version')!=METADATA_VERSION and time.time()-entry.get('metadata_attempted_at',0)>=config.ARTWORK_RETRY_SECONDS:
+            entry['metadata_attempted_at']=time.time();changed=True
+            try:
+                soup=BeautifulSoup(fetch(url),'html.parser')
+                title=soup.select_one('meta[property="og:title"]')
+                if not title or norm(title.get('content',''))!=norm(entry.get('matched_title','')):
+                    raise ValueError('Metadata page disagrees with verified artwork match')
+                fields=title_fields(soup)
+                if not fields['description'] and not fields['cast']:
+                    raise ValueError('No synopsis or cast on title page')
+                entry.update(fields)
+                entry.pop('metadata_error',None)
+                print('METADATA',key,item['title'],'cast=',len(fields['cast']),flush=True)
+            except Exception as exc:
+                entry['metadata_error']=str(exc)
+                print('METADATA ERROR',key,str(exc),flush=True)
+        if item.get('kind')=='show' and match[1]=='tv':
+            episodes=entry.setdefault('episode_metadata',{})
+            attempts=entry.setdefault('episode_metadata_attempts',{})
+            for season in item.get('seasons',[]):
+                number=season['number'];season_key=str(number)
+                if number<0:continue
+                prior=attempts.get(season_key,{})
+                inventory=hashlib.sha256(json.dumps([(e.get('episode_number'),e.get('episode_end'),e.get('episode_title')) for e in season.get('episodes',[])],sort_keys=True).encode()).hexdigest()
+                if prior.get('version')==METADATA_VERSION and prior.get('inventory')==inventory and season_key in episodes:continue
+                if prior.get('inventory')==inventory and time.time()-prior.get('time',0)<config.ARTWORK_RETRY_SECONDS:continue
+                attempts[season_key]={'time':time.time(),'inventory':inventory};changed=True
+                try:
+                    soup=BeautifulSoup(fetch(url.rstrip('/')+'/season/'+season_key),'html.parser')
+                    episodes[season_key]=season_fields(soup,url,number)
+                    attempts[season_key]['version']=METADATA_VERSION
+                    print('METADATA EPISODES',item['title'],'season',number,len(episodes[season_key]),flush=True)
+                except Exception as exc:
+                    attempts[season_key]['error']=str(exc)
+                    print('METADATA EPISODES ERROR',item['title'],number,str(exc),flush=True)
+        if changed:
+            index[key]=entry
+            write_json(INDEX,index)
 
 def run(refresh=()):
     with import_lock():
@@ -209,6 +257,7 @@ def _run(refresh=()):
         write_json(REPORT,report)
     write_json(REPORT,report)
     enrich_genres(index, items)
+    enrich_metadata(index, items)
     credits=['<!doctype html><html><meta charset="utf-8"><title>GRAVYFLIX artwork sources</title><h1>Artwork sources</h1><p>Public TMDB title pages and locally generated frames. This project is not endorsed by TMDB.</p><ul>']
     for key,entry in sorted(index.items()):
         title=html.escape(entry.get('matched_title',key))

@@ -44,6 +44,11 @@ def decorate(item, base, parent_id=None):
     item['genres'] = genres_for(item['id'], parent_id, entry)
     if not isinstance(entry, dict):
         return item
+    from .title_metadata import decorate_metadata
+    metadata_entry = entry
+    if parent_id and not any(entry.get(key) for key in ("description", "cast", "episode_metadata")):
+        metadata_entry = index.get(parent_id, entry)
+    decorate_metadata(item, metadata_entry)
     for role in ('poster', 'backdrop', 'landscape'):
         name = entry.get(role, '')
         if isinstance(name, str) and NAME.fullmatch(name) and (root()/name).is_file():

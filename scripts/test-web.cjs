@@ -19,6 +19,8 @@ const { chromium, expect } = require("@playwright/test");
       id,
       kind: "episode",
       title: "Episode " + n,
+      description: "An episode-specific synopsis.",
+      description_scope: "episode",
       show_title: "Rick and Morty",
       season_number: 1,
       episode_number: n,
@@ -30,6 +32,8 @@ const { chromium, expect } = require("@playwright/test");
         id: 1,
         kind: "movie",
         title: "Obsession",
+        description: "A verified movie synopsis.",
+        cast: ["Lead Actor", "Lead Actress"],
         year: 2026,
         duration: 6600,
         genres: ["Horror"],
@@ -40,6 +44,8 @@ const { chromium, expect } = require("@playwright/test");
         id: "show-rick",
         kind: "show",
         title: "Rick and Morty",
+        description: "A verified series synopsis.",
+        cast: ["Series Star"],
         genres: ["Comedy", "Animation"],
         episode_count: 2,
         season_count: 1,
@@ -119,6 +125,9 @@ const { chromium, expect } = require("@playwright/test");
     await page.getByRole("button", { name: "Shows", exact: true }).click();
     await page.locator(".card").first().click();
     await expect(page.locator("#details")).toBeVisible();
+    await expect(page.locator("#detail-description")).toHaveText("A verified series synopsis.");
+    await expect(page.locator("#detail-cast")).toHaveText("Starring: Series Star");
+    await expect(page.locator(".episode").first()).toContainText("An episode-specific synopsis.");
     await expect(page.locator(".episode")).toHaveCount(2);
     await page.locator("#playback-mode").selectOption("compatible");
     await expect(page.locator("#detail-subtitles")).toContainText("2 of 2");
@@ -129,6 +138,10 @@ const { chromium, expect } = require("@playwright/test");
     await page.locator("#search").fill("nothing-matches");
     await expect(page.locator("#shelves")).toContainText("No titles match");
     await page.getByRole("button", { name: "Movies", exact: true }).click();
+    await page.locator(".card").first().click();
+    await expect(page.locator("#detail-description")).toHaveText("A verified movie synopsis.");
+    await expect(page.locator("#detail-cast")).toHaveText("Starring: Lead Actor, Lead Actress");
+    await page.getByRole("button", { name: "Close details" }).click();
     await page.getByRole("button", { name: "Home", exact: true }).click();
     await page.locator("#hero-play").click();
     await expect(page.locator("#remote")).toBeVisible();

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component name="MainScene" extends="Scene">
   <script type="text/brightscript" uri="pkg:/source/HomeActions.brs" />
+  <script type="text/brightscript" uri="pkg:/source/HomeData.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TitleData.brs" />
   <script type="text/brightscript" uri="pkg:/source/Config.brs" />
   <script type="text/brightscript" uri="MainScene.brs" />
   <script type="text/brightscript" uri="HistoryController.brs" />
@@ -15,7 +17,15 @@
       <Poster id="poster" translation="[64,80]" width="280" height="420" loadDisplayMode="scaleToFit"
         loadingBitmapUri="pkg:/images/default-poster.png" failedBitmapUri="pkg:/images/default-poster.png" />
       <Label id="movieTitle" translation="[392,80]" width="800" height="100" wrap="true" font="font:LargeBoldSystemFont" />
-      <Label id="movieInfo" translation="[392,196]" width="780" height="270" wrap="true" color="0xCBD5E1FF" />
+      <Label id="titleMetadata" translation="[392,188]" width="800" height="30" color="0xA8B8CCFF">
+        <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="20" />
+      </Label>
+      <Label id="movieInfo" translation="[392,228]" width="800" height="174" wrap="true" color="0xDFE7F2FF">
+        <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="22" />
+      </Label>
+      <Label id="titleCast" translation="[392,408]" width="800" height="56" wrap="true" color="0xADBFD5FF">
+        <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="20" />
+      </Label>
       <Label id="subtitleHint" translation="[392,474]" width="800" height="28" color="0xA8CBDFFF">
         <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="20" />
       </Label>

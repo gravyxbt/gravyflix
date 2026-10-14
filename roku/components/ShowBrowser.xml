@@ -2,6 +2,7 @@
 <component name="ShowBrowser" extends="Group">
   <interface>
     <field id="showData" type="assocarray" onChange="onShow" alwaysNotify="true" />
+    <field id="episodeRequested" type="integer" alwaysNotify="true" />
     <field id="selectedEpisode" type="assocarray" alwaysNotify="true" />
     <function name="focusBrowser" />
     <function name="focusEpisodes" />
@@ -9,6 +10,7 @@
   </interface>
   <script type="text/brightscript" uri="pkg:/source/HomeData.brs" />
   <script type="text/brightscript" uri="ShowBrowser.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TitleData.brs" />
   <script type="text/brightscript" uri="pkg:/source/SubtitleLabels.brs" />
   <children>
     <Rectangle width="1280" height="720" color="0x080E18FF" />
@@ -23,24 +25,30 @@
     <Label id="summary" translation="[64,150]" width="1120" height="32" color="0xBAC8DBFF">
       <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="22" />
     </Label>
-    <Label id="preview" translation="[64,194]" width="1136" height="32" color="0xE0E8F4FF">
+    <Label id="showDescription" translation="[64,190]" width="1136" height="84" wrap="true" color="0xDFE7F2FF">
       <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="22" />
     </Label>
-    <Label id="episodeSubtitles" translation="[64,236]" width="1136" height="24" color="0xA8CBDFFF">
+    <Label id="showCast" translation="[64,280]" width="1136" height="28" color="0xADBFD5FF">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="19" />
+    </Label>
+    <Label id="preview" translation="[64,318]" width="1136" height="32" color="0xE0E8F4FF">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="22" />
+    </Label>
+    <Label id="episodeSubtitles" translation="[64,356]" width="1136" height="24" color="0xA8CBDFFF">
       <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="18" />
     </Label>
-    <Rectangle translation="[64,264]" width="1136" height="1" color="0x28384CFF" />
-    <Label translation="[80,280]" width="280" height="30" text="SEASONS" color="0x91A6C0FF">
+    <Rectangle translation="[64,386]" width="1136" height="1" color="0x28384CFF" />
+    <Label translation="[80,398]" width="280" height="30" text="SEASONS" color="0x91A6C0FF">
       <Font role="font" uri="pkg:/fonts/DejaVuSans-Bold.ttf" size="18" />
     </Label>
-    <Label id="episodeHeading" translation="[400,280]" width="790" height="30" text="EPISODES" color="0x91A6C0FF">
+    <Label id="episodeHeading" translation="[400,398]" width="790" height="30" text="EPISODES" color="0x91A6C0FF">
       <Font role="font" uri="pkg:/fonts/DejaVuSans-Bold.ttf" size="18" />
     </Label>
-    <LabelList id="seasons" translation="[64,326]" itemSize="[280,54]" itemSpacing="[0,6]" numRows="5" vertFocusAnimationStyle="floatingFocus" color="0xC7D5E7FF" focusedColor="0x08101CFF" focusBitmapBlendColor="0x80BAFFFF">
+    <LabelList id="seasons" translation="[64,438]" itemSize="[280,54]" itemSpacing="[0,6]" numRows="3" vertFocusAnimationStyle="floatingFocus" color="0xC7D5E7FF" focusedColor="0x08101CFF" focusBitmapBlendColor="0x80BAFFFF">
       <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="23" />
       <Font role="focusedFont" uri="pkg:/fonts/DejaVuSans-Bold.ttf" size="23" />
     </LabelList>
-    <LabelList id="episodes" translation="[384,326]" itemSize="[816,54]" itemSpacing="[0,6]" numRows="5" vertFocusAnimationStyle="floatingFocus" color="0xC7D5E7FF" focusedColor="0x08101CFF" focusBitmapBlendColor="0x80BAFFFF">
+    <LabelList id="episodes" translation="[384,438]" itemSize="[816,54]" itemSpacing="[0,6]" numRows="3" vertFocusAnimationStyle="floatingFocus" color="0xC7D5E7FF" focusedColor="0x08101CFF" focusBitmapBlendColor="0x80BAFFFF">
       <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="22" />
       <Font role="focusedFont" uri="pkg:/fonts/DejaVuSans-Bold.ttf" size="22" />
     </LabelList>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component name="TopNavigation" extends="Group">
   <interface>
+    <field id="selectedTab" type="string" value="home" onChange="onSelectedTab" />
     <field id="activated" type="string" alwaysNotify="true" />
     <field id="exitDown" type="integer" alwaysNotify="true" />
   </interface>
@@ -19,10 +20,13 @@
       <Label id="movies" translation="[132,0]" width="112" height="42" text="Movies" horizAlign="center" vertAlign="center" color="0xB8C2D1FF">
         <Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="21" />
       </Label>
-      <Label id="search" translation="[264,0]" width="112" height="42" text="Search" horizAlign="center" vertAlign="center" color="0x8895A8FF">
+      <Label id="shows" translation="[264,0]" width="112" height="42" text="Shows" horizAlign="center" vertAlign="center" color="0xB8C2D1FF">
         <Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="21" />
       </Label>
-      <Rectangle translation="[29,43]" width="54" height="3" color="0x7EB7FFFF" />
+      <Label id="search" translation="[396,0]" width="112" height="42" text="Search" horizAlign="center" vertAlign="center" color="0x8895A8FF">
+        <Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="21" />
+      </Label>
+      <Rectangle id="selectedLine" translation="[29,43]" width="54" height="3" color="0x7EB7FFFF" />
     </Group>
     <Label translation="[1040,26]" width="176" height="28" text="*  Refresh" horizAlign="right" color="0x8D9CB0FF">
       <Font uri="pkg:/fonts/DejaVuSans.ttf" role="font" size="17" />

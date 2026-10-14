@@ -283,6 +283,8 @@ function openDetails(item) {
   $("detail-kind").textContent = item.kind === "show" ? "SERIES" : "MOVIE";
   $("detail-meta").textContent = metadata(item);
   $("detail-description").textContent = item.description || item.overview || "";
+  $("detail-cast").textContent = Array.isArray(item.cast) && item.cast.length
+    ? "Starring: " + item.cast.slice(0, 5).join(", ") : "";
   $("detail-subtitles").textContent = captionLabel(item);
   image($("detail-art"), artwork(item));
   $("detail-play").textContent = resume(item)
@@ -325,6 +327,12 @@ function renderEpisodes() {
       .filter(Boolean)
       .join(" · ");
     text.append(title, info);
+    if (ep.description && ep.description_scope === "episode") {
+      const synopsis = document.createElement("p");
+      synopsis.className = "episode-meta";
+      synopsis.textContent = ep.description;
+      text.append(synopsis);
+    }
     const play = document.createElement("button");
     play.textContent = record(ep) ? "Resume" : "Play";
     play.setAttribute("aria-label", `${play.textContent} ${ep.title}`);

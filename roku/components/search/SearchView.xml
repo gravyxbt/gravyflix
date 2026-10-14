@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="SearchView" extends="Group">
+  <interface>
+    <field id="movies" type="array" alwaysNotify="true" onChange="onLibraryChanged" />
+    <field id="selectedMovie" type="assocarray" />
+    <field id="titleRequested" type="integer" alwaysNotify="true" />
+    <field id="exitRequested" type="integer" alwaysNotify="true" />
+    <field id="exitUp" type="integer" alwaysNotify="true" />
+    <function name="focusSearch" />
+    <function name="updateCachedMovies" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/HomeData.brs" />
+  <script type="text/brightscript" uri="pkg:/source/SearchData.brs" />
+  <script type="text/brightscript" uri="pkg:/source/SearchLayout.brs" />
+  <script type="text/brightscript" uri="SearchView.brs" />
+  <children>
+    <Label translation="[64,104]" width="1100" height="44" text="Search your library" color="0xF3F7FFFF">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans-Bold.ttf" size="30" />
+    </Label>
+    <Label translation="[64,156]" width="448" height="32" wrap="true" text="Find movies and shows by title, cast or genre." color="0xADBFD5FF">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="20" />
+    </Label>
+    <Group id="keyboardHost" translation="[64,200]" />
+    <Group id="actions" translation="[64,612]">
+      <Rectangle id="actionFocus" width="224" height="48" color="0x233D5DFF" visible="false" />
+      <Label width="224" height="48" text="Browse results" horizAlign="center" vertAlign="center" color="0xF3F7FFFF">
+        <Font role="font" uri="pkg:/fonts/DejaVuSans-Bold.ttf" size="20" />
+      </Label>
+      <Label translation="[238,0]" width="182" height="48" text="Clear" horizAlign="center" vertAlign="center" color="0xADBFD5FF">
+        <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="20" />
+      </Label>
+    </Group>
+    <Label id="resultCount" translation="[584,154]" width="632" height="30" color="0x8BBFFFFF">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans-Bold.ttf" size="20" />
+    </Label>
+    <MarkupGrid id="results" translation="[574,192]" itemComponentName="MovieCard"
+      itemSize="[240,144]" itemSpacing="[22,12]" numColumns="2" numRows="3"
+      drawFocusFeedback="false" vertFocusAnimationStyle="fixedFocus" visible="false" />
+    <Label id="empty" translation="[584,234]" width="620" height="150" wrap="true" color="0xC6CEDAFF">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="24" />
+    </Label>
+    <Label id="preview" translation="[584,656]" width="632" height="30" color="0xCBD5E1FF">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="18" />
+    </Label>
+    <Label translation="[64,678]" width="480" height="26" wrap="true" text="Play/Pause: results    Back: keyboard / menu" color="0x91A6C0FF">
+      <Font role="font" uri="pkg:/fonts/DejaVuSans.ttf" size="17" />
+    </Label>
+    <Timer id="keyboardLayoutDelay" duration="0.15" repeat="true" />
+    <Timer id="queryDelay" duration="0.18" repeat="false" />
+  </children>
+</component>

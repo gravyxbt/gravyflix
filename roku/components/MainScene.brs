@@ -4,12 +4,10 @@ sub init()
     for each id in ["library", "details", "poster", "movieTitle", "movieInfo", "play", "video", "showBrowser"]
         m[id] = m.top.FindNode(id)
     end for
-    m.library.ObserveField("selectedMovie", "onSelected")
-    m.library.ObserveField("playMovie", "onHeroPlay")
+    observeTitleActions()
     m.library.ObserveField("refreshRequested", "refreshLibrary")
     m.play.ObserveField("buttonSelected", "onPlay")
     m.video.ObserveField("state", "onVideoState")
-    m.showBrowser.ObserveField("selectedEpisode", "onEpisodeSelected")
     initializeAutoplay()
     initializeHistory()
     m.fromShow = false
@@ -20,14 +18,22 @@ sub init()
     loadMovies()
 end sub
 
+sub observeTitleActions()
+    ' Navigation observes explicit user commands, never mutable cached payloads.
+    m.library.ObserveField("titleRequested", "onSelected")
+    m.library.ObserveField("playRequested", "onHeroPlay")
+    m.showBrowser.ObserveField("episodeRequested", "onEpisodeSelected")
+end sub
+
 sub refreshLibrary()
     loadMovies(true)
 end sub
 
-sub loadMovies(rescan = false as boolean)
+sub loadMovies(rescan = false as boolean, preserveLibrary = false as boolean)
     if m.loading then return
     m.loading = true
-    m.library.statusText = "Loading your library..."
+    m.preserveLibrary = preserveLibrary
+    if not preserveLibrary then m.library.statusText = "Loading your library..."
     m.task = CreateObject("roSGNode", "ApiTask")
     m.task.url = ServerUrl() + "/api/library/browse"
     if rescan
@@ -42,11 +48,19 @@ sub onMovies()
     m.loading = false
     result = m.task.result
     if result.error <> invalid
+        if m.preserveLibrary
+            print "API: background library update failed: "; result.error
+            return
+        end if
         m.library.statusText = "Unable to refresh the media library." + Chr(10) + "Server: " + ServerUrl() + Chr(10) + result.error + Chr(10) + "Press OK to retry."
         return
     end if
     m.movies = result.movies
-    m.library.movies = m.movies
+    if m.preserveLibrary
+        m.library.CallFunc("updateCachedMovies", m.movies)
+    else
+        m.library.movies = m.movies
+    end if
 end sub
 
 function posterFor(movie as object) as string
@@ -57,10 +71,12 @@ function posterFor(movie as object) as string
 end function
 
 sub onSelected()
+    if m.mode <> "library" or not m.library.visible then return
     openTitle(m.library.selectedMovie)
 end sub
 
 sub onHeroPlay()
+    if m.mode <> "library" or not m.library.visible then return
     item = m.library.playMovie
     if item = invalid then return
     target = HomeResumeTarget(item)
@@ -91,6 +107,7 @@ sub openTitle(item as object)
 end sub
 
 sub onEpisodeSelected()
+    if m.mode <> "show" or not m.showBrowser.visible then return
     resetAutoplay()
     m.fromShow = true
     m.showBrowser.visible = false
@@ -109,10 +126,10 @@ sub openMovie(movie as object)
     m.poster.uri = posterFor(m.selected)
     m.movieTitle.text = m.selected.title
     if m.fromShow then m.movieTitle.text = m.selected.show_title + " · " + m.selected.title
-    info = ""
-    if m.selected.year <> invalid then info = m.selected.year.ToStr() + Chr(10)
-    if m.selected.filename <> invalid then info = info + m.selected.filename + Chr(10)
-    if m.selected.compatibility_note <> invalid then info = info + Chr(10) + m.selected.compatibility_note
+    info = TitleSummary(m.selected)
+    m.top.FindNode("titleMetadata").text = MoviePresentation(m.selected).metadataLine
+    m.top.FindNode("titleCast").text = TitleCast(m.selected)
+    print "UI: title file="; m.selected.filename; " compatibility="; m.selected.compatibility_note
     m.top.FindNode("backHint").text = "Back  Movies"
     if m.fromShow then m.top.FindNode("backHint").text = "Back  Episodes"
     m.play.text = "Play"
@@ -159,7 +176,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
         m.library.visible = true
         m.mode = "library"
         m.library.CallFunc("focusHome")
-        loadMovies()
+        loadMovies(false, true)
         return true
     end if
     if key = "back" and m.mode = "details" and m.fromShow
@@ -174,7 +191,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
         m.library.visible = true
         m.mode = "library"
         m.library.CallFunc("focusHome")
-        loadMovies()
+        loadMovies(false, true)
         return true
     end if
     return false

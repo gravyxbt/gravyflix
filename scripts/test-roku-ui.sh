@@ -17,6 +17,34 @@ output="$(./node_modules/.bin/brs --root tests/roku roku/source/SubtitleLabels.b
 printf '%s\n' "$output"
 [[ "$output" == *"PASS: Subtitle availability labels"* && "$output" != *"FAIL:"* ]]
 
-output="$(./node_modules/.bin/brs --root tests/roku roku/source/HomeActions.brs roku/components/home/HomeView.brs tests/roku/home-actions.brs 2>&1)"
+output="$(./node_modules/.bin/brs --root tests/roku roku/source/HomeActions.brs roku/source/HomeData.brs roku/components/home/HomeView.brs tests/roku/home-actions.brs 2>&1)"
 printf '%s\n' "$output"
 [[ "$output" == *"PASS: Home resume actions"* && "$output" != *"FAIL:"* ]]
+
+output="$(./node_modules/.bin/brs --root tests/roku roku/components/MainScene.brs tests/roku/library-return.brs 2>&1)"
+printf '%s\n' "$output"
+[[ "$output" == *"PASS: Library return navigation"* && "$output" != *"FAIL:"* ]]
+
+output="$(./node_modules/.bin/brs --root tests/roku roku/components/home/TopNavigation.brs tests/roku/top-navigation.brs 2>&1)"
+printf '%s\n' "$output"
+[[ "$output" == *"PASS: Top navigation"* && "$output" != *"FAIL:"* ]]
+
+output="$(./node_modules/.bin/brs --root tests/roku roku/source/HomeData.brs roku/source/TitleData.brs tests/roku/title-data.brs 2>&1)"
+printf '%s\n' "$output"
+[[ "$output" == *"PASS: Title page presentation"* && "$output" != *"FAIL:"* ]]
+
+output="$(./node_modules/.bin/brs --root tests/roku roku/components/home/MediaRows.brs tests/roku/row-selection.brs 2>&1)"
+printf '%s\n' "$output"
+[[ "$output" == *"PASS: Row selection events"* && "$output" != *"FAIL:"* ]]
+
+output="$(./node_modules/.bin/brs --root tests/roku roku/source/HomeData.brs roku/source/SearchData.brs tests/roku/search-data.brs 2>&1)"
+printf '%s\n' "$output"
+[[ "$output" == *"PASS: Search data matching"* && "$output" != *"FAIL:"* ]]
+
+output="$(./node_modules/.bin/brs --root tests/roku roku/source/HomeData.brs roku/source/SearchData.brs roku/source/SearchLayout.brs roku/components/search/SearchView.brs tests/roku/search-view.brs 2>&1)"
+printf '%s\n' "$output"
+[[ "$output" == *"PASS: Search navigation and cache updates"* && "$output" != *"FAIL:"* ]]
+
+output="$(./node_modules/.bin/brs --root tests/roku roku/source/HomeData.brs roku/source/SearchLayout.brs tests/roku/search-layout.brs 2>&1)"
+printf '%s\n' "$output"
+[[ "$output" == *"PASS: Search keyboard layout"* && "$output" != *"FAIL:"* ]]

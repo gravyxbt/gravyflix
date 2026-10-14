@@ -25,6 +25,7 @@ sub onFocus()
     ' Use the RowList's interpolated focus clock; no per-card timers or network work.
     amount = m.top.focusPercent * m.top.rowFocusPercent
     if not m.top.rowListHasFocus then amount = 0
+    if m.top.gridHasFocus then amount = m.top.focusPercent
     size = 1.0 + 0.07 * amount
     m.tile.scale = [size, size]
     m.ring.opacity = amount
