@@ -23,7 +23,10 @@ sub reportHistory()
             result = requestJson("/api/playback/sessions/" + m.top.sessionId + "/progress", "POST", FormatJson(payload), true, 3000)
             if result.error = invalid
                 pending = invalid
-                if terminal then return
+                if terminal
+                    m.top.saved = {movie_id:m.top.movieId,session_id:m.top.sessionId,completed:result.completed}
+                    return
+                end if
             else
                 print "HISTORY: update deferred: "; result.error
                 retryAt = clock.TotalSeconds() + 3

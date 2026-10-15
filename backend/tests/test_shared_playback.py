@@ -210,3 +210,96 @@ def test_cast_cancel_conversion_releases_lease(client,library,monkeypatch):
     manager._play_movie.assert_not_called()
     fake.release.assert_called_once_with('lease')
     assert history.history()==[]
+
+@pytest.mark.parametrize('state',['stopped','next'])
+@pytest.mark.parametrize('position,completed',[(999,False),(1000,True),(1050,True)])
+def test_movie_exit_or_next_at_credits(client,library,state,position,completed):
+    from app.credits import save
+    row=movie(library)
+    save(row,1000,'manual','Test credits marker')
+    sid=session(row)
+    history.record(sid,1,position,1200,'playing')
+    response=client.post(f'/api/playback/sessions/{sid}/end',headers=HEADERS,
+        json=dict(sequence=2,position=position,duration=1200,state=state))
+    assert response.status_code==200 and response.json()['completed']==completed
+    entry=history.history()[0]
+    assert bool(entry['completed'])==completed
+    catalog=client.get('/api/library/browse').json()[0]
+    assert catalog['completed']==completed
+    assert catalog['resume_position']==(0 if completed else position)
+
+@pytest.mark.parametrize('state',['stopped','next'])
+def test_episode_completion_does_not_complete_unwatched_series(client,library,state):
+    for name in ['Show.S01E01.mp4','Show.S01E02.mp4']:(library/name).write_bytes(b'fake')
+    scan_library()
+    with connection() as db:db.execute('UPDATE movies SET duration=1200')
+    episodes=client.get('/api/movies').json()
+    row=get_movie(episodes[0]['id']);sid=session(row)
+    history.record(sid,1,1170,1200,'playing')
+    result=history.record(sid,2,1170,1200,state)
+    assert result['completed']
+    show=client.get('/api/library/browse').json()[0]
+    first,second=show['seasons'][0]['episodes']
+    assert first['completed'] and not second['completed']
+    assert show['resume_episode']['id']==second['id']
+    assert show['continue_watching'] and show['resume_position']==0
+    sid2=session(get_movie(second['id']))
+    history.record(sid2,1,200,1200,'playing')
+    show=client.get('/api/library/browse').json()[0]
+    assert show['resume_episode']['id']==second['id']
+
+@pytest.mark.parametrize('state',['playing','paused','error','cancelled'])
+def test_credits_without_intentional_exit_stay_resumable(client,library,state):
+    row=movie(library);sid=session(row)
+    history.record(sid,1,1005,1200,'playing')
+    result=history.record(sid,2,1005,1200,state,credits_start=1000)
+    assert not result['completed'] and not history.history()[0]['completed']
+
+
+def test_no_marker_uses_ending_window_not_a_guessed_long_credit_sequence(client,library):
+    row=movie(library)
+    for position,completed in [(1169,False),(1170,True)]:
+        sid=session(row)
+        history.record(sid,1,position,1200,'playing')
+        assert history.record(sid,2,position,1200,'stopped')['completed']==completed
+
+
+def test_series_continuation_across_seasons_and_restart(client,library):
+    names=['Show.S01E01.mp4','Show.S01E02.mp4','Show.S02E01.mp4']
+    for name in names:(library/name).write_bytes(b'fake')
+    scan_library()
+    with connection() as db:db.execute('UPDATE movies SET duration=1200')
+    def browse():return client.get('/api/library/browse').json()[0]
+    assert 'resume_episode' not in browse()
+    episodes=[e for s in browse()['seasons'] for e in s['episodes']]
+    def finish(e):
+        sid=session(get_movie(e['id']))
+        history.record(sid,1,1170,1200,'playing')
+        history.record(sid,2,1170,1200,'stopped')
+    finish(episodes[0]);finish(episodes[1])
+    history.initialize() # Progress survives a new application initialization.
+    assert browse()['resume_episode']['id']==episodes[2]['id']
+    sid=session(get_movie(episodes[2]['id']))
+    history.record(sid,1,345,1200,'playing')
+    history.record(sid,2,345,1200,'stopped')
+    assert browse()['resume_episode']['id']==episodes[2]['id']
+    assert browse()['resume_position']==345
+    finish(episodes[2])
+    assert 'resume_episode' not in browse()
+    (library/'Show.S02E02.mp4').write_bytes(b'fake')
+    scan_library()
+    assert browse()['resume_episode']['episode_number']==2
+    assert browse()['resume_episode']['season_number']==2
+
+
+def test_series_ignores_extras_and_changed_sources(client,library):
+    for name in ['Show.S00E01.mp4','Show.S01E01.mp4','Show.S01E02.mp4']:
+        (library/name).write_bytes(b'fake')
+    scan_library()
+    with connection() as db:db.execute('UPDATE movies SET duration=1200')
+    show=client.get('/api/library/browse').json()[0]
+    regular=next(e for s in show['seasons'] for e in s['episodes'] if e['season_number']==1)
+    sid=session(get_movie(regular['id']))
+    history.record(sid,1,300,1200,'playing')
+    with connection() as db:db.execute('UPDATE movies SET file_size=file_size+1 WHERE id=?',(regular['id'],))
+    assert 'resume_episode' not in client.get('/api/library/browse').json()[0]

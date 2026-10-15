@@ -1,5 +1,5 @@
 sub Main()
-    m.top = {state:"playing",control:"",trickPlayBar:{visible:false}}
+    m.top = {state:"playing",control:"",trickPlayBar:{visible:false},exitRequested:0}
     init()
     check(onKeyEvent("OK", true), "OK handled")
     check(m.top.control = "pause", "OK pauses playing video")
@@ -29,7 +29,10 @@ sub Main()
     m.top.control = ""
     onKeyEvent("playonly", true)
     check(m.top.control = "", "Play-only does not pause")
-    check(not onKeyEvent("back", true), "Back bubbles to existing scene handler")
+    check(onKeyEvent("back", true), "Video Back sends an explicit exit command")
+    check(m.top.exitRequested = 1, "Back is delivered even when native Video would consume it")
+    check(not onKeyEvent("back", false), "Back release does not send a second command")
+    check(m.top.exitRequested = 1, "Exactly one exit command per Back press")
     check(not onKeyEvent("right", true), "Native seeking preserved")
     check(not onKeyEvent("options", true), "Native Options preserved")
     ' Native seek confirmation must not be replaced with control=resume.
@@ -101,6 +104,42 @@ sub Main()
     onKeyEvent("right",true)
     check(not m.skipIntro.visible, "Native seek dismisses button")
 
+    ' A visually selected countdown never takes focus from this player.
+    init()
+    m.top.state = "playing"
+    m.top.control = ""
+    m.top.exitRequested = 0
+    m.top.trickPlayBar = {visible:false}
+    m.nextUp = {visible:true,dismissed:0,activated:0,releasedFocus:0}
+    check(onKeyEvent("back",true), "First Back dismisses the visible countdown in the Video handler")
+    check(m.nextUp.dismissed = 1 and m.top.exitRequested = 0, "Countdown cancellation does not exit playback")
+    m.nextUp.visible = false ' Controller hides it; no focus change is required.
+    onKeyEvent("back",false)
+    check(onKeyEvent("OK",true) and m.top.control = "pause", "OK can pause immediately after dismissal")
+    onKeyEvent("OK",false)
+    m.top.state = "paused"
+    check(onKeyEvent("play",true) and m.top.control = "resume", "Play/Pause can resume after dismissal")
+    onKeyEvent("play",false)
+    check(not onKeyEvent("fastforward",true), "Fast-forward remains available after dismissal")
+    check(not onKeyEvent("rewind",true), "Rewind remains available after dismissal")
+    check(onKeyEvent("back",true) and m.top.exitRequested = 1, "Next Back can exit after dismissal")
+    m.top.state = "playing"
+    m.top.control = ""
+    m.nextUp.visible = true
+    check(onKeyEvent("OK",true) and m.nextUp.activated = 1, "Countdown OK starts next rather than pausing")
+    onKeyEvent("OK",true)
+    check(m.nextUp.activated = 1, "Held OK cannot activate next twice")
+    onKeyEvent("OK",false)
+    check(not onKeyEvent("right",true) and m.nextUp.releasedFocus = 1, "Seeking dismisses the visual countdown and remains native")
+    resetTransportKeys()
+    m.top.state = "playing"
+    m.top.control = ""
+    check(onKeyEvent("play",true) and m.top.control = "pause", "Pause still works while countdown is visible")
+    check(m.nextUp.releasedFocus = 2, "Transport controls dismiss countdown without a focus handoff")
+    resetTransportKeys()
+    m.nextUp.visible = false
+    m.top.control = ""
+    check(onKeyEvent("OK",true) and m.top.control = "pause", "New title resets held keys so the first OK can pause")
     print "PASS: Video controls"
 end sub
 

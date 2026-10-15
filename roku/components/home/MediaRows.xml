@@ -6,6 +6,8 @@
     <field id="selectionRequested" type="integer" alwaysNotify="true" />
     <field id="selectedItem" type="node" alwaysNotify="true" />
     <field id="exitUp" type="integer" alwaysNotify="true" />
+    <function name="captureFocus" />
+    <function name="restoreFocus" />
     <function name="focusList" />
     <function name="jumpToRow" />
   </interface>

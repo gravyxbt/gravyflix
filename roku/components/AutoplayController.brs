@@ -59,15 +59,15 @@ sub updateNextUp()
         end if
         m.nextUp.visible = true
         m.nextUpShown = true
-        m.nextUp.SetFocus(true)
-        print "AUTOPLAY: countdown selected"
+        ' Visually selected, while Video retains native transport/seek focus.
+        print "AUTOPLAY: countdown ready; video keeps focus"
     end if
 end sub
 
 sub releaseNextUpFocus()
     hideNextUp()
     m.nextUpReleased = true
-    m.video.SetFocus(true)
+    ' No focus handoff: the Video never gave up remote focus.
 end sub
 
 sub cancelAutoplay()

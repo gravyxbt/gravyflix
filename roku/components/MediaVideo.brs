@@ -5,16 +5,39 @@ sub init()
     m.nativeTransportKey = ""
     m.skipIntro = invalid
     m.skipTimer = invalid
-    if Type(m.top) = "roSGNode" then initializeIntroControls()
+    m.nextUp = invalid
+    if Type(m.top) = "roSGNode"
+        m.nextUp = m.top.FindNode("nextUp")
+        m.top.ObserveField("content", "resetTransportKeys")
+        initializeIntroControls()
+    end if
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean
+    ' Video's native Back handling can consume the key after overlay focus returns.
+    ' Send an explicit exit command to the scene instead of relying on bubbling.
+    if key = "back" and press
+        if m.nextUp <> invalid
+            if m.nextUp.visible
+                m.nextUp.dismissed++
+                return true
+            end if
+        end if
+        m.top.exitRequested++
+        return true
+    end if
     transport = key = "OK" or key = "play" or key = "pause" or key = "playonly"
     if not transport
         if key = "options" or key = "left" or key = "right" or key = "fastforward" or key = "rewind"
             if m.skipIntro <> invalid then expireSkipIntro()
+            if press and m.nextUp <> invalid
+                if m.nextUp.visible then m.nextUp.releasedFocus++
+            end if
         end if
         return false
+    end if
+    if press and key <> "OK" and m.nextUp <> invalid
+        if m.nextUp.visible then m.nextUp.releasedFocus++
     end if
     ' Once delegated, keep the whole down/repeat/up sequence with the native player.
     ' Confirming a seek can hide the timeline before key-up arrives.
@@ -41,6 +64,12 @@ function onKeyEvent(key as string, press as boolean) as boolean
     if m.heldTransportKey = key then return true
     m.heldTransportKey = key
     if key = "OK"
+        if m.nextUp <> invalid
+            if m.nextUp.visible
+                m.nextUp.activated++
+                return true
+            end if
+        end if
         if activateSkipIntro() then return true
     end if
     state = m.top.state
@@ -53,3 +82,9 @@ function onKeyEvent(key as string, press as boolean) as boolean
     end if
     return true
 end function
+
+sub resetTransportKeys()
+    ' A title handoff may move focus before the previous OK key-up arrives.
+    m.heldTransportKey = ""
+    m.nativeTransportKey = ""
+end sub

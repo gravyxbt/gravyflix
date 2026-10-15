@@ -54,6 +54,19 @@ def create(row, client_id, client_type, intent='resume'):
     prune()
     return {'session_id':sid,'resume_position':resume}
 
+def ending_start(row, duration, credits_start=None):
+    """Use the same movie credits / episode ending windows as the next-title UI."""
+    from pathlib import Path
+    from . import config
+    from .catalog import episode_identity, grouping_hint
+    path = Path(row['file_path'])
+    try: folders = path.parent.relative_to(config.MOVIES_DIR).parts
+    except ValueError: folders = ()
+    episode = episode_identity(path.name, folders) or grouping_hint(path.name, folders)
+    if not episode and credits_start is not None and math.isfinite(credits_start) and 0 < credits_start < duration:
+        return credits_start
+    return duration - 30 if duration > 30 else None
+
 def record(sid, sequence, position, duration, state, event=None, *, credits_start=None):
     if not all(math.isfinite(x) and x>=0 for x in (position,duration)):raise ValueError('Invalid progress')
     now=time.time();event=event or state
@@ -77,17 +90,21 @@ def record(sid, sequence, position, duration, state, event=None, *, credits_star
         db.execute('UPDATE playback_sessions SET sequence=?,position=?,duration=?,state=?,updated_at=?,ended=?,activated=?,first_play_seconds=?,buffering_since=?,buffering_seconds=? WHERE id=?',(sequence,position,duration,state,now,int(ended),int(activated),first,buffering_since,buffering,sid))
         db.execute('INSERT INTO playback_events VALUES(?,?,?,?,?)',(sid,sequence,event,now,position))
         db.execute('DELETE FROM playback_events WHERE session_id=? AND sequence NOT IN (SELECT sequence FROM playback_events WHERE session_id=? ORDER BY sequence DESC LIMIT 200)',(sid,sid))
+        completed=False
+        written=False
         if activated and duration>0:
-            completed=state=='finished' or (state=='next' and credits_start is not None and 0<credits_start<duration and position>=credits_start)
+            ending=ending_start(row,duration,credits_start)
+            completed=state=='finished' or (state in {'stopped','next'} and ending is not None and position>=ending)
             if completed:position=duration
             # Every newer registered session that has actually started wins over an older one.
             latest=db.execute('SELECT MAX(version) FROM playback_sessions WHERE movie_id=? AND activated=1',(s['movie_id'],)).fetchone()[0]
             if latest==s['version']:
+                written=True
                 db.execute('''INSERT INTO watch_history VALUES(?,?,?,?,?,?,?) ON CONFLICT(movie_id) DO UPDATE SET
                     position=excluded.position,duration=excluded.duration,completed=excluded.completed,
                     updated_at=excluded.updated_at,signature=excluded.signature,owner_version=excluded.owner_version
                     WHERE excluded.owner_version>=watch_history.owner_version''',(s['movie_id'],position,duration,int(completed),datetime.now(timezone.utc).isoformat(),s['signature'],s['version']))
-    return {'accepted':True}
+    return {'accepted':True,'completed':bool(completed and written)}
 
 def delivery(sid, plan, preparation_seconds=None):
     with connection() as db:
@@ -105,9 +122,25 @@ def decorate(catalog):
         children=[e for s in item.get('seasons',[]) for e in s['episodes']] if item.get('kind')=='show' else [item]
         for e in children:
             r=h.get(e['id'],{})
-            e.update(resume_position=r.get('position',0) if not r.get('completed') else 0,completed=bool(r.get('completed')),history_updated_at=r.get('updated_at',''))
+            e.update(resume_position=r.get('position',0) if not r.get('completed') else 0,completed=bool(r.get('completed') and r.get('resume_valid')),history_updated_at=r.get('updated_at',''))
         if item.get('kind')=='show':
-            unfinished=[e for e in children if e.get('season_number',0)>0 and e.get('resume_position',0)>15 and e.get('resume_position',0)<(e.get('duration') or 0)-30]
-            if unfinished:
-                target=max(unfinished,key=lambda e:e['history_updated_at']);item.update(resume_episode=target,resume_position=target['resume_position'],duration=target.get('duration'),history_updated_at=target['history_updated_at'])
+            episodes=sorted((e for e in children if e.get('season_number',0)>0),
+                key=lambda e:(e['season_number'],e.get('episode_number',0),e['id']))
+            watched=[e for e in episodes if h.get(e['id'],{}).get('resume_valid')
+                and (e['completed'] or e['resume_position']>15)]
+            if watched:
+                latest=max(watched,key=lambda e:e['history_updated_at'])
+                target=None
+                if not latest['completed']:
+                    target=latest
+                else:
+                    following=episodes[episodes.index(latest)+1:]
+                    target=next((e for e in following if not e['completed']),None)
+                    # Revisit gaps only after reaching the end of the available series.
+                    if target is None:
+                        target=next((e for e in episodes if not e['completed']),None)
+                if target is not None:
+                    item.update(resume_episode=target,resume_position=target['resume_position'],
+                        duration=target.get('duration'),history_updated_at=latest['history_updated_at'],
+                        continue_watching=True)
     return catalog

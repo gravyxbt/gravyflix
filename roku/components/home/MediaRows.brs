@@ -45,3 +45,33 @@ function onKeyEvent(key as string, press as boolean) as boolean
     end if
     return false
 end function
+
+function captureFocus() as object
+    pair = m.list.rowItemFocused
+    item = itemAt(pair)
+    if item = invalid then return {row:0,column:0,rowKey:"",id:invalid}
+    return {row:pair[0],column:pair[1],rowKey:item.homeRowKey,id:item.movieData.id}
+end function
+
+sub restoreFocus(anchor as object)
+    root = m.list.content
+    if root = invalid or root.GetChildCount() = 0 then return
+    rowIndex = anchor.row
+    if rowIndex >= root.GetChildCount() then rowIndex = root.GetChildCount() - 1
+    for i = 0 to root.GetChildCount() - 1
+        row = root.GetChild(i)
+        if row.GetChildCount() > 0
+            if row.GetChild(0).homeRowKey = anchor.rowKey then rowIndex = i
+        end if
+    end for
+    row = root.GetChild(rowIndex)
+    if row.GetChildCount() = 0 then return
+    column = anchor.column
+    if column >= row.GetChildCount() then column = row.GetChildCount() - 1
+    for i = 0 to row.GetChildCount() - 1
+        if row.GetChild(i).movieData.id = anchor.id then column = i
+    end for
+    m.list.jumpToRowItem = [rowIndex,column]
+    onFocused()
+    ' Never SetFocus here: a background history response must not steal focus.
+end sub

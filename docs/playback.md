@@ -46,3 +46,37 @@ rendered: decoder freezes, TV health and Wi-Fi signal cannot be measured here.
 Watch briefly on Roku, exit, refresh the phone and resume on Cast. Seek backward,
 stop and resume on Roku. Check Start over, direct MP4, MKV audio, AVI, captions,
 Skip Intro and episode autoplay. Consult diagnostics for failures and preparation.
+
+## Back during the next-title countdown
+
+Back while the countdown is visible dismisses it and cancels autoplay for that
+title. The next Back press exits playback to the title page, for movies and
+episodes alike. The countdown is visually selected without taking keyboard focus from Video,
+so cancelling it cannot trap pause/seek/Back in a hidden node. OK plays the next
+title while the countdown is visible. The Video component sends an explicit exit command so native
+player key handling cannot swallow that press after focus returns from the overlay.
+Exiting saves progress, cancels background preparation and queued autoplay, then
+stops playback. Late finished/stopped notifications cannot start another title.
+
+## Completion when leaving credits
+
+Leaving playback with Back, Stop or Next during a movie's verified credits marks
+that movie completed in shared watch history. Without a credits marker, completion
+uses the existing final-30-second ending window. Episodes use their current
+final-30-second ending window too; only the episode you watched is completed, not
+unwatched episodes or the whole series. Normal playback/pausing in the ending
+window does not complete an item until you exit, skip or reach the end. Decoder
+errors and cancelled preparation do not count as finishing.
+
+Completed items are removed from Roku's cached Continue Watching shelf after the
+history save is acknowledged, with your remaining browsing selection preserved.
+A started series stays in that shelf while regular episodes remain unfinished,
+pointing to the current episode or the next episode after completion.
+The completion policy is shared by Roku and Cast; replaying a completed title
+starts from the beginning and can create new unfinished progress.
+
+### Continuing a series
+
+Continue Watching remembers the most recently watched regular episode across Roku and casting. Stop partway through to resume that episode; finish it (or exit/advance in its final 30 seconds) to continue with the next unfinished episode, across seasons. The action says **Next Episode** when it starts at the beginning. Extras do not change the series position. A series you have not started stays out of this shelf; a fully completed series leaves it. If you reach the last available episode with earlier gaps, the first unfinished episode is offered. Newly added episodes make a previously finished series eligible again after the library scan. Progress is stored in SQLite and survives server and client restarts.
+
+Roku refreshes Continue Watching after a saved playback session without rebuilding the other shelves or resetting your browsing position.

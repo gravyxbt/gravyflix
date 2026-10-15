@@ -48,3 +48,14 @@ printf '%s\n' "$output"
 output="$(./node_modules/.bin/brs --root tests/roku roku/source/HomeData.brs roku/source/SearchLayout.brs tests/roku/search-layout.brs 2>&1)"
 printf '%s\n' "$output"
 [[ "$output" == *"PASS: Search keyboard layout"* && "$output" != *"FAIL:"* ]]
+
+output="$(./node_modules/.bin/brs --root tests/roku roku/components/NextUpOverlay.brs tests/roku/next-up-back.brs 2>&1)"
+printf '%s\n' "$output"
+[[ "$output" == *"PASS: Next-up Back dismissal"* && "$output" != *"FAIL:"* ]]
+output="$(./node_modules/.bin/brs --root tests/roku roku/components/MainScene.brs tests/roku/playback-exit.brs 2>&1)"
+printf '%s\n' "$output"
+[[ "$output" == *"PASS: Playback exit and autoplay cancellation"* && "$output" != *"FAIL:"* ]]
+
+output="$(./node_modules/.bin/brs --root tests/roku roku/components/HistoryController.brs tests/roku/history-save.brs 2>&1)"
+printf '%s\n' "$output"
+[[ "$output" == *"PASS: History save acknowledgements"* && "$output" != *"FAIL:"* ]]

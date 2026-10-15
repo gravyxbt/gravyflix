@@ -113,7 +113,9 @@ function BuildHomeRows(movies as object) as object
             end if
             genreBuckets["uncategorized"].Push(entry)
         end if
-        if entry.resumeSeconds > 0 and entry.durationSeconds > entry.resumeSeconds + 30
+        if movie.kind = "show" and movie.continue_watching = true
+            continuing.Push(entry)
+        else if entry.resumeSeconds > 0 and entry.durationSeconds > entry.resumeSeconds + 30
             if movie.completed <> true then continuing.Push(entry)
         end if
     end for

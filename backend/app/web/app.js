@@ -40,10 +40,7 @@ const record = (item) =>
   );
 const resume = (item) =>
   item.kind === "show"
-    ? episodes(item)
-        .map((e) => ({ e, h: record(e) }))
-        .filter((x) => x.h && x.e.season_number > 0)
-        .sort((a, b) => b.h.updated_at.localeCompare(a.h.updated_at))[0]?.e
+    ? item.resume_episode || null
     : record(item)
       ? item
       : null;
@@ -124,7 +121,7 @@ function hero(item) {
   $("hero-subtitles").textContent = captionLabel(item);
   $("hero-play").disabled = false;
   $("hero-info").disabled = false;
-  $("hero-play").textContent = resume(item)
+  $("hero-play").textContent = item.kind === "show" && resume(item) && !record(resume(item)) ? "Next Episode" : resume(item)
     ? "▶ Resume on TV"
     : item.kind === "show"
       ? "▶ Play series on TV"
@@ -255,7 +252,9 @@ function render() {
   const continuing = items
     .filter((i) => resume(i))
     .sort((a, b) =>
-      record(resume(b)).updated_at.localeCompare(record(resume(a)).updated_at),
+      (b.history_updated_at || record(resume(b))?.updated_at || "").localeCompare(
+        a.history_updated_at || record(resume(a))?.updated_at || "",
+      ),
     );
   shelf("Continue Watching", continuing);
   shelf(
@@ -287,7 +286,7 @@ function openDetails(item) {
     ? "Starring: " + item.cast.slice(0, 5).join(", ") : "";
   $("detail-subtitles").textContent = captionLabel(item);
   image($("detail-art"), artwork(item));
-  $("detail-play").textContent = resume(item)
+  $("detail-play").textContent = item.kind === "show" && resume(item) && !record(resume(item)) ? "Next Episode" : resume(item)
     ? "▶ Resume on TV"
     : item.kind === "show"
       ? "▶ Play first episode"

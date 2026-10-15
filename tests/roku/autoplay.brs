@@ -26,8 +26,8 @@ sub Main()
     check(AutoplayNeedsConfirmation(3),"Fourth automatic transition requires confirmation")
 
     ' Exercise the real controller with mocked nodes and playback entrypoints.
-    m.nextUp = {visible:false,remaining:0,SetFocus:function(flag):m.focus=flag:end function}
-    m.video = {state:"playing",duration:1200,position:1175,trickPlayBar:{visible:false},control:"",SetFocus:function(flag):m.focus=flag:end function}
+    m.nextUp = {visible:false,remaining:0,SetFocus:rejectCountdownFocus}
+    m.video = {focus:true,focusChanges:0,state:"playing",duration:1200,position:1175,trickPlayBar:{visible:false},control:"",SetFocus:function(flag):m.focus=flag:m.focusChanges++:end function}
     m.mode="video"
     m.nextItem=movies[1]
     m.nextUpShown=false
@@ -50,6 +50,7 @@ sub Main()
     updateNextUp()
     cancelAutoplay()
     check(m.autoplayCancelled and not m.nextUp.visible,"Back cancels current autoplay")
+    check(m.mode="video" and m.video.focus and m.video.focusChanges=0,"Countdown dismissal keeps Video focus without a handoff")
 
     m.autoplayCount=2
     m.nextItem=movies[1]
@@ -150,4 +151,8 @@ sub check(condition as boolean, message as string)
         print "FAIL: ";message
         stop
     end if
+end sub
+
+sub rejectCountdownFocus(flag as boolean)
+    if flag then print "FAIL: Countdown must never take remote focus" : stop
 end sub

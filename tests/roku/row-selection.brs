@@ -13,6 +13,14 @@ sub Main()
     m.list.rowItemSelected = [0,5]
     onSelected()
     check(m.top.selectionRequested = 2, "Invalid selection does not navigate")
+    item.homeRowKey = "all"
+    root.GetChildCount = childCount
+    row.GetChildCount = childCount
+    m.list.rowItemFocused = [0,0]
+    m.list.SetFocus = rejectFocus
+    restoreFocus({row:1,column:0,rowKey:"all",id:9})
+    check(m.list.jumpToRowItem[0] = 0 and m.list.jumpToRowItem[1] = 0, "Removing an earlier shelf keeps the same movie selected")
+    check(captureFocus().id = 9, "Focus capture uses stable media IDs")
     print "PASS: Row selection events"
 end sub
 function childAt(index as integer) as dynamic
@@ -21,4 +29,11 @@ function childAt(index as integer) as dynamic
 end function
 sub check(condition as boolean, message as string)
     if not condition then print "FAIL: "; message : stop
+end sub
+
+function childCount() as integer
+    return m.children.Count()
+end function
+sub rejectFocus(flag as boolean)
+    print "FAIL: Background shelf updates must not steal remote focus" : stop
 end sub

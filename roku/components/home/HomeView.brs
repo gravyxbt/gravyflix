@@ -195,7 +195,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
 end function
 
 ' Refresh progress/metadata on existing nodes; never reset RowList content or focus.
-' New titles and changed shelf membership appear after the explicit Options refresh.
+' Reconcile Continue Watching without replacing other shelves or stealing focus.
 sub updateCachedMovies(movies as object)
     m.search.CallFunc("updateCachedMovies", movies)
     if m.rows.content = invalid then return
@@ -217,6 +217,68 @@ sub updateCachedMovies(movies as object)
             end if
         end for
     end for
+    removed = false
+    anchor = invalid
+    for rowIndex = m.rows.content.GetChildCount() - 1 to 0 step -1
+        row = m.rows.content.GetChild(rowIndex)
+        if row.GetChildCount() > 0
+            if row.GetChild(0).homeRowKey = "continue"
+                for itemIndex = row.GetChildCount() - 1 to 0 step -1
+                    item = row.GetChild(itemIndex)
+                    if HomeResumeTarget(item.movieData) = invalid
+                        if not removed then anchor = m.rows.CallFunc("captureFocus")
+                        removed = true
+                        row.RemoveChild(item)
+                    end if
+                end for
+                if row.GetChildCount() = 0 then m.rows.content.RemoveChild(row)
+            end if
+        end if
+    end for
+    ' New progress can create a shelf even when there was no Continue Watching row.
+    continueRow = invalid
+    for i = 0 to m.rows.content.GetChildCount() - 1
+        row = m.rows.content.GetChild(i)
+        if row.GetChildCount() > 0
+            if row.GetChild(0).homeRowKey = "continue" then continueRow = row
+        end if
+    end for
+    for each definition in BuildHomeRows(movies)
+        if definition.key = "continue"
+            for each entry in definition.items
+                present = false
+                if continueRow <> invalid
+                    for i = 0 to continueRow.GetChildCount() - 1
+                        if continueRow.GetChild(i).movieData.id = entry.movieData.id then present = true
+                    end for
+                end if
+                if not present
+                    if not removed then anchor = m.rows.CallFunc("captureFocus")
+                    removed = true
+                    if continueRow = invalid
+                        continueRow = CreateObject("roSGNode", "ContentNode")
+                        continueRow.title = "Continue Watching"
+                        m.rows.content.InsertChild(continueRow, 0)
+                    end if
+                    item = continueRow.CreateChild("MovieContent")
+                    item.SetFields({title:entry.title, description:entry.description,
+                        metadataLine:entry.metadataLine, cardImage:entry.cardImage,
+                        portraitArt:entry.portraitArt, heroImage:entry.heroImage,
+                        progress:entry.progress, movieData:entry.movieData, homeRowKey:"continue"})
+                end if
+            end for
+        end if
+    end for
+    m.allRow = -1
+    m.showsRow = -1
+    for i = 0 to m.rows.content.GetChildCount() - 1
+        item = m.rows.content.GetChild(i).GetChild(0)
+        if item <> invalid
+            if item.homeRowKey = "all" then m.allRow = i
+            if item.homeRowKey = "shows" then m.showsRow = i
+        end if
+    end for
+    if removed then m.rows.CallFunc("restoreFocus", anchor)
     m.hero.CallFunc("refreshAction")
     m.updatingCache = false
 end sub

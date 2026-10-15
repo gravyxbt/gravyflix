@@ -1,5 +1,4 @@
 sub init()
-    m.top.ObserveField("focusedChild", "onFocus")
     m.okHeld = false
 end sub
 
@@ -19,10 +18,6 @@ end sub
 
 sub onCountdown()
     m.top.FindNode("countdown").text = "Up next in " + m.top.remaining.ToStr() + " seconds"
-end sub
-
-sub onFocus()
-    m.top.FindNode("focusBar").visible = m.top.HasFocus()
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean

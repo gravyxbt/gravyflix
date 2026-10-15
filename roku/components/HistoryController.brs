@@ -1,5 +1,7 @@
 sub initializeHistory()
     m.historyTask = invalid
+    m.historyDirty = false
+    m.historySessionId = ""
     m.historyClock = CreateObject("roTimespan")
     m.historyPosition = 0
     m.historyDuration = 0
@@ -22,7 +24,10 @@ sub beginHistory(plan as object)
     if plan.session_id = invalid then return
     m.historyTask = CreateObject("roSGNode", "HistoryTask")
     m.historyTask.baseUrl = ServerUrl()
+    m.historySessionId = plan.session_id
     m.historyTask.sessionId = plan.session_id
+    m.historyTask.movieId = m.selected.id
+    m.historyTask.ObserveField("saved", "onHistorySaved")
     m.historyTask.control = "RUN"
 end sub
 
@@ -61,4 +66,21 @@ sub endHistory(state as string)
     if m.historyTask = invalid then return
     m.historyTask.snapshot = {position:m.historyPosition,duration:m.historyDuration,state:state}
     m.historyTask = invalid
+end sub
+
+sub onHistorySaved(event as object)
+    saved = event.GetData()
+    m.historyDirty = true
+    if m.mode = "details" and m.selected <> invalid
+        if saved.movie_id = m.selected.id and saved.completed = true and saved.session_id = m.historySessionId
+            m.selected.completed = true
+            m.selected.resume_position = 0
+            m.play.text = "Play"
+            m.top.FindNode("restart").visible = false
+        end if
+    end if
+    if m.mode = "library" and not m.loading
+        m.historyDirty = false
+        loadMovies(false, true)
+    end if
 end sub

@@ -8,6 +8,7 @@ sub init()
     m.library.ObserveField("refreshRequested", "refreshLibrary")
     m.play.ObserveField("buttonSelected", "onPlay")
     m.video.ObserveField("state", "onVideoState")
+    m.video.ObserveField("exitRequested", "exitPlayback")
     initializeAutoplay()
     initializeHistory()
     m.fromShow = false
@@ -32,6 +33,7 @@ end sub
 sub loadMovies(rescan = false as boolean, preserveLibrary = false as boolean)
     if m.loading then return
     m.loading = true
+    m.historyDirty = false
     m.preserveLibrary = preserveLibrary
     if not preserveLibrary then m.library.statusText = "Loading your library..."
     m.task = CreateObject("roSGNode", "ApiTask")
@@ -60,6 +62,10 @@ sub onMovies()
         m.library.CallFunc("updateCachedMovies", m.movies)
     else
         m.library.movies = m.movies
+    end if
+    if m.historyDirty = true and m.mode = "library"
+        m.historyDirty = false
+        loadMovies(false, true)
     end if
 end sub
 
@@ -165,10 +171,8 @@ function onKeyEvent(key as string, press as boolean) as boolean
         showDetails()
         return true
     end if
-    if key = "back" and m.mode = "video"
-        endHistory("stopped")
-        m.video.control = "stop"
-        showDetails()
+    if key = "back" and (m.mode = "video" or m.mode = "transition")
+        exitPlayback()
         return true
     end if
     if key = "back" and m.mode = "show"
@@ -196,6 +200,18 @@ function onKeyEvent(key as string, press as boolean) as boolean
     end if
     return false
 end function
+
+sub exitPlayback()
+    if m.mode <> "video" and m.mode <> "transition" then return
+    ' Change mode before stop: synchronous/late finished events must not autoplay.
+    m.mode = "details"
+    m.autoplayCancelled = true
+    m.queuedAutoplay = invalid
+    endHistory("stopped")
+    m.video.control = "stop"
+    showDetails()
+    print "VIDEO: exited to title details"
+end sub
 
 sub onPlay()
     if m.mode <> "details" then return

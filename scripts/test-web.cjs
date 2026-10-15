@@ -56,6 +56,9 @@ const { chromium, expect } = require("@playwright/test");
         ],
       },
     ];
+    library[1].resume_episode = library[1].seasons[0].episodes[1];
+    library[1].continue_watching = true;
+    library[1].history_updated_at = "2026-09-30";
     let state = {
       name: "Living Room",
       connected: true,
@@ -129,6 +132,12 @@ const { chromium, expect } = require("@playwright/test");
     await expect(page.locator("#detail-cast")).toHaveText("Starring: Series Star");
     await expect(page.locator(".episode").first()).toContainText("An episode-specific synopsis.");
     await expect(page.locator(".episode")).toHaveCount(2);
+    await expect(page.locator("#detail-play")).toHaveText("Next Episode");
+    await page.locator("#detail-play").click();
+    expect(commands.find((x) => x.movie_id)?.movie_id).toBe(3);
+    await page.locator("#stop").click();
+    commands.length = 0;
+    await page.locator(".card").first().click();
     await page.locator("#playback-mode").selectOption("compatible");
     await expect(page.locator("#detail-subtitles")).toContainText("2 of 2");
     await page.getByRole("button", { name: "Close details" }).click();
